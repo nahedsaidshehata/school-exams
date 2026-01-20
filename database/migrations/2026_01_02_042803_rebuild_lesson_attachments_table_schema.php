@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         // Since attachments are currently failing to insert, we rebuild the table cleanly.
@@ -15,6 +14,7 @@ return new class extends Migration
             $table->id(); // integer auto increment (matches your older setup)
 
             $table->uuid('lesson_id')->index();
+            $table->foreign('lesson_id')->references('id')->on('lessons')->onDelete('cascade');
 
             $table->string('original_name');
             $table->string('disk')->default('public');

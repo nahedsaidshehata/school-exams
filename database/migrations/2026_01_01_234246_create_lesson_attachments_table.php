@@ -7,9 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        Schema::dropIfExists('lesson_attachments');
         Schema::create('lesson_attachments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('lesson_id');
+            $table->uuid('lesson_id');
             $table->unsignedBigInteger('uploaded_by')->nullable();
 
             $table->string('type')->default('CONTENT'); // CONTENT / OTHER

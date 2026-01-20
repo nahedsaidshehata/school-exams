@@ -5,12 +5,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         // SQLite: we must rebuild table to change enum/check constraints
-        DB::statement('PRAGMA foreign_keys=OFF');
+        Schema::disableForeignKeyConstraints();
 
         // ✅ Safety: if a previous failed migration left temp table behind
         Schema::dropIfExists('exam_assignments_new');
@@ -70,12 +69,12 @@ return new class extends Migration
         Schema::drop('exam_assignments');
         Schema::rename('exam_assignments_new', 'exam_assignments');
 
-        DB::statement('PRAGMA foreign_keys=ON');
+        Schema::enableForeignKeyConstraints();
     }
 
     public function down(): void
     {
-        DB::statement('PRAGMA foreign_keys=OFF');
+        Schema::disableForeignKeyConstraints();
 
         // ✅ Safety: if a previous failed rollback left temp table behind
         Schema::dropIfExists('exam_assignments_old');
@@ -118,6 +117,6 @@ return new class extends Migration
         Schema::drop('exam_assignments');
         Schema::rename('exam_assignments_old', 'exam_assignments');
 
-        DB::statement('PRAGMA foreign_keys=ON');
+        Schema::enableForeignKeyConstraints();
     }
 };

@@ -15,7 +15,8 @@ return new class extends Migration {
             });
         } catch (QueryException $e) {
             // SQLite: index already exists -> ignore
-            if (str_contains($e->getMessage(), 'already exists')) {
+            // MySQL: Duplicate key name -> ignore
+            if (str_contains($e->getMessage(), 'already exists') || str_contains($e->getMessage(), 'Duplicate key name')) {
                 return;
             }
             throw $e;
