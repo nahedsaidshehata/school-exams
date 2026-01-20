@@ -61,7 +61,7 @@
       @php
         $examId = $exam->id ?? $exam['id'] ?? null;
 
-        $title = $exam->title ?? $exam['title'] ?? __('Exam');
+        $title = $exam->title_en ?? $exam['title']['en'] ?? __('Exam');
         $duration = $exam->duration_minutes ?? $exam['duration_minutes'] ?? $exam->duration ?? $exam['duration'] ?? null;
 
         $windowStart = $exam->start_at ?? $exam['start_at'] ?? null;

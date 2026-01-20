@@ -2,13 +2,12 @@
 @extends('layouts.student')
 
 @section('title', __('Student Dashboard'))
-
-@php
-  // Flexible counts (works with either arrays or collections)
-  $availableCount = $availableCount ?? (isset($availableExams) ? (is_countable($availableExams) ? count($availableExams) : 0) : 0);
-  $submittedCount = $submittedCount ?? (isset($submittedExams) ? (is_countable($submittedExams) ? count($submittedExams) : 0) : 0);
-  $expiredCount   = $expiredCount   ?? (isset($expiredExams) ? (is_countable($expiredExams) ? count($expiredExams) : 0) : 0);
-@endphp
+{{--@php--}}
+{{--  // Flexible counts (works with either arrays or collections)--}}
+{{--  $availableCount = $availableCount ?? (isset($availableExams) ? (is_countable($availableExams) ? count($availableExams) : 0) : 0);--}}
+{{--  $submittedCount = $submittedCount ?? (isset($submittedExams) ? (is_countable($submittedExams) ? count($submittedExams) : 0) : 0);--}}
+{{--  $expiredCount   = $expiredCount   ?? (isset($expiredExams) ? (is_countable($expiredExams) ? count($expiredExams) : 0) : 0);--}}
+{{--@endphp--}}
 
 @section('content')
   {{-- Hero (like Admin Dashboard welcome card) --}}
