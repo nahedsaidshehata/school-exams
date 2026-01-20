@@ -1,4 +1,4 @@
-{{-- resources/views/admin/exams/show.blade.php --}}
+{{-- resources/views/admin/exams/show.blade.php.php --}}
 @extends('layouts.admin')
 
 @section('title', $exam->title_en)

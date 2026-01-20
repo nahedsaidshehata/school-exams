@@ -69,7 +69,7 @@ class SchoolController extends Controller
             'name_ar' => 'required|string|max:255',
             'username' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'nullable|string|min:8|confirmed',
             'full_name' => 'nullable|string|max:255',
         ]);
 
@@ -101,5 +101,71 @@ class SchoolController extends Controller
             return back()->withInput()
                 ->withErrors(['error' => 'Failed to create school: ' . $e->getMessage()]);
         }
+    }
+
+    public function edit(School $school)
+    {
+        $user = $school->schoolUser()->first();
+        return view('admin.schools.edit', compact('school', 'user'));
+    }
+
+    public function update(Request $request, School $school)
+    {
+        $request->validate([
+            'name_en' => 'required|string|min:2|max:255',
+            'name_ar' => 'required|string|min:2|max:255',
+            'username' => 'required|string|min:2|max:255',
+            'email' => 'nullable|email|max:255',
+            'password' => 'nullable|string|min:8|confirmed',
+            'full_name' => 'nullable|string|max:255',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Update school
+            $school->update([
+                'name_en' => $request->name_en,
+                'name_ar' => $request->name_ar,
+            ]);
+
+            // Update school account user
+            $user = $school->schoolUser()->first();
+            if ($user) {
+                $userData = [
+                    'username' => $request->username,
+                    'email' => $request->email,
+                    'full_name' => $request->full_name,
+                ];
+
+                // Update password if provided
+                if ($request->filled('password')) {
+                    $userData['password'] = Hash::make($request->password);
+                }
+
+                $user->update($userData);
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.schools.index')
+                ->with('success', 'School updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->withInput()
+                ->withErrors(['error' => 'Failed to update school: ' . $e->getMessage()]);
+        }
+    }
+
+    public function show(School $school)
+    {
+        $user = $school->schoolUser()->first();
+        return view('admin.schools.show', compact('school', 'user'));
+    }
+    public function destroy(School $school)
+    {
+        $school->delete();
+        return redirect()->route('admin.schools.index')
+            ->with('success', 'School deleted successfully.');
     }
 }

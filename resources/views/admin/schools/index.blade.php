@@ -73,6 +73,7 @@
               <th>{{ __('Name (AR)') }}</th>
               <th>{{ __('School Account') }}</th>
               <th class="text-nowrap">{{ __('Created') }}</th>
+                <th class="text-nowrap text-end">{{ __('Actions') }}</th>
             </tr>
           </thead>
           <tbody id="schoolsTbody">

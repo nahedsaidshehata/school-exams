@@ -1,4 +1,4 @@
-{{-- resources/views/admin/attempts/show.blade.php --}}
+{{-- resources/views/admin/attempts/show.blade.php.php --}}
 @extends('layouts.admin')
 
 @section('title', __('Attempt Grading'))

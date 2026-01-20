@@ -82,7 +82,7 @@ Route::prefix('admin')
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         // Schools
-        Route::resource('schools', SchoolController::class)->only(['index', 'create', 'store']);
+        Route::resource('schools', SchoolController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy','show']);
 
         // Students (Manual create)
         Route::resource('students', StudentController::class)->only(['index', 'create', 'store']);

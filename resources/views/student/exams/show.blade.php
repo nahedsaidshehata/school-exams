@@ -1,4 +1,4 @@
-{{-- resources/views/student/exams/show.blade.php --}}
+{{-- resources/views/student/exams/show.blade.php.php --}}
 @extends('layouts.student')
 
 @section('title', __('Exam Details'))
