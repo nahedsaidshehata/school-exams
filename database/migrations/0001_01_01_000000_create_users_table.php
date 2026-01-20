@@ -1,0 +1,62 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('users', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            // tenancy
+            $table->uuid('school_id')->nullable()->index(); // NULL for admin only
+
+            // roles
+            $table->enum('role', ['admin','school','student'])->index();
+
+            // login fields
+            $table->string('username')->nullable();
+            $table->string('email')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+
+            $table->string('password');
+            $table->string('full_name')->nullable();
+
+            $table->rememberToken();
+            $table->timestamps();
+
+            // FK
+            $table->foreign('school_id')->references('id')->on('schools')->onDelete('cascade');
+
+            // Multi-tenant uniqueness
+            $table->unique(['school_id', 'username']);
+            $table->unique(['school_id', 'email']);
+        });
+
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+
+        // sessions table (database session driver)
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->uuid('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
+    }
+};

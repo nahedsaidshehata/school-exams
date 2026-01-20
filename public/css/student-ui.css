@@ -1,0 +1,704 @@
+/* ============================================
+   STUDENT UI - Modern Professional Styles
+   ============================================ */
+
+:root {
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --info-color: #3b82f6;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --border-radius: 0.75rem;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* ============================================
+   LAYOUT & TYPOGRAPHY
+   ============================================ */
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--gray-50);
+    color: var(--gray-800);
+}
+
+.student-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.student-header {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 1rem 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.student-header .navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--primary-color);
+}
+
+.student-main {
+    flex: 1;
+    padding: 2rem 0;
+}
+
+/* ============================================
+   CARDS & CONTAINERS
+   ============================================ */
+
+.card-modern {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s;
+}
+
+.card-modern:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card-modern .card-header {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+}
+
+.card-modern .card-body {
+    padding: 1.5rem;
+}
+
+/* ============================================
+   DASHBOARD STATS
+   ============================================ */
+
+.stat-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card .stat-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card.stat-primary .stat-icon {
+    background: #eef2ff;
+    color: var(--primary-color);
+}
+
+.stat-card.stat-success .stat-icon {
+    background: #d1fae5;
+    color: var(--success-color);
+}
+
+.stat-card.stat-warning .stat-icon {
+    background: #fef3c7;
+    color: var(--warning-color);
+}
+
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.stat-card .stat-label {
+    color: var(--gray-600);
+    font-size: 0.875rem;
+}
+
+/* ============================================
+   EXAM ROOM - PROGRESS BAR
+   ============================================ */
+
+.exam-progress-container {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+}
+
+.progress-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.progress-text {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+.progress-numbers {
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.progress {
+    height: 0.75rem;
+    border-radius: 9999px;
+    background-color: var(--gray-200);
+}
+
+.progress-bar {
+    border-radius: 9999px;
+    background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+    transition: width 0.3s ease;
+}
+
+/* ============================================
+   EXAM ROOM - TIMER
+   ============================================ */
+
+.timer-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: var(--gray-100);
+    color: var(--gray-800);
+    transition: all 0.3s;
+}
+
+.timer-pill.timer-warning {
+    background: #fef3c7;
+    color: var(--warning-color);
+    animation: pulse 2s infinite;
+}
+
+.timer-pill.timer-danger {
+    background: #fee2e2;
+    color: var(--danger-color);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* ============================================
+   EXAM ROOM - QUESTION NAVIGATION
+   ============================================ */
+
+.question-nav-sidebar {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+}
+
+.question-nav-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid var(--gray-300);
+    background: white;
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-chip:hover {
+    background: var(--gray-50);
+}
+
+.filter-chip.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.question-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
+    gap: 0.5rem;
+}
+
+.question-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    border: 2px solid var(--gray-300);
+    background: white;
+    color: var(--gray-700);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.question-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.question-btn.answered {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+.question-btn.current {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.question-btn.flagged::after {
+    content: '🚩';
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    font-size: 0.625rem;
+}
+
+/* ============================================
+   EXAM ROOM - QUESTION DISPLAY
+   ============================================ */
+
+.question-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    min-height: 500px;
+}
+
+.question-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--gray-100);
+}
+
+.question-prompt {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.question-prompt-en {
+    font-size: 1rem;
+    color: var(--gray-600);
+    margin-bottom: 1rem;
+}
+
+.question-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.badge-modern {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.option-card {
+    border: 2px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.option-card:hover {
+    border-color: var(--primary-color);
+    background: #f5f3ff;
+}
+
+.option-card.selected {
+    border-color: var(--primary-color);
+    background: #eef2ff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.option-card input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 1rem;
+    cursor: pointer;
+}
+
+.option-text {
+    font-size: 1rem;
+    color: var(--gray-900);
+    font-weight: 500;
+}
+
+.option-text-en {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-top: 0.25rem;
+}
+
+/* ============================================
+   EXAM ROOM - ACTIONS
+   ============================================ */
+
+.exam-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.btn-modern {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-modern:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-modern:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary-modern {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary-modern:hover:not(:disabled) {
+    background: var(--primary-hover);
+}
+
+.btn-success-modern {
+    background: var(--success-color);
+    color: white;
+}
+
+.btn-danger-modern {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-outline-modern {
+    background: white;
+    color: var(--gray-700);
+    border: 2px solid var(--gray-300);
+}
+
+.btn-outline-modern:hover:not(:disabled) {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+}
+
+/* ============================================
+   STATUS INDICATORS
+   ============================================ */
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-saving {
+    background: #fef3c7;
+    color: var(--warning-color);
+}
+
+.status-saved {
+    background: #d1fae5;
+    color: var(--success-color);
+}
+
+.status-error {
+    background: #fee2e2;
+    color: var(--danger-color);
+}
+
+/* ============================================
+   TOAST NOTIFICATIONS
+   ============================================ */
+
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+}
+
+.toast-modern {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1rem 1.5rem;
+    box-shadow: var(--shadow-lg);
+    border-left: 4px solid var(--primary-color);
+    margin-bottom: 0.5rem;
+    min-width: 300px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast-modern.toast-success {
+    border-left-color: var(--success-color);
+}
+
+.toast-modern.toast-error {
+    border-left-color: var(--danger-color);
+}
+
+/* ============================================
+   EXAM LIST & CARDS
+   ============================================ */
+
+.exam-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.exam-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+}
+
+.exam-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+
+.exam-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.exam-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-top: 0.75rem;
+}
+
+.exam-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+/* ============================================
+   RTL SUPPORT
+   ============================================ */
+
+[dir="rtl"] .option-card input[type="radio"] {
+    margin-right: 0;
+    margin-left: 1rem;
+}
+
+[dir="rtl"] .toast-container {
+    right: auto;
+    left: 1rem;
+}
+
+[dir="rtl"] .toast-modern {
+    border-left: none;
+    border-right: 4px solid var(--primary-color);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .student-main {
+        padding: 1rem 0;
+    }
+    
+    .question-nav-sidebar {
+        position: static;
+        margin-bottom: 1rem;
+    }
+    
+    .exam-actions {
+        flex-direction: column;
+    }
+    
+    .btn-modern {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================ */
+
+.spinner-modern {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px solid var(--gray-200);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+}
+
+/* ============================================
+   SAFETY GUARDS - Prevent UI issues on non-student pages
+   ============================================ */
+
+body:not(.student-ui) .student-sidebar,
+body:not(.student-ui) .student-header,
+body:not(.student-ui) .student-shell,
+body:not(.student-ui) .sidebar-overlay,
+body:not(.student-ui) .offcanvas-backdrop,
+body:not(.student-ui) .modal-backdrop {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+body:not(.student-ui) {
+    overflow: auto !important;
+}
+
+/* Prevent pseudo-element overlays on non-student pages */
+body:not(.student-ui)::before,
+body:not(.student-ui)::after,
+html:not(.student-ui)::before,
+html:not(.student-ui)::after {
+    content: none !important;
+    display: none !important;
+    pointer-events: none !important;
+}
+
+/* Remove Bootstrap modal/offcanvas classes on non-student pages */
+body:not(.student-ui).modal-open,
+body:not(.student-ui).offcanvas-open,
+body:not(.student-ui).sidebar-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
+}
+
+/* Ensure all potential overlay elements are hidden */
+body:not(.student-ui) .modal,
+body:not(.student-ui) .offcanvas,
+body:not(.student-ui) .modal-backdrop,
+body:not(.student-ui) .offcanvas-backdrop,
+body:not(.student-ui) [class*="backdrop"],
+body:not(.student-ui) [class*="overlay"] {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
