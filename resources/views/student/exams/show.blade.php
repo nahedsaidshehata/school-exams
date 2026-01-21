@@ -7,12 +7,12 @@
   $examObj = $exam ?? $item ?? null;
   $examId = $examObj->id ?? $examObj['id'] ?? request()->route('exam') ?? null;
 
-  $title = $examObj->title ?? $examObj['title'] ?? __('Exam');
-  $desc  = $examObj->description ?? $examObj['description'] ?? null;
+  $title = $examObj->title_en ?? $examObj['title']['en'] ?? __('Exam');
+  $desc = $examObj->description ?? $examObj['description'] ?? null;
   $duration = $examObj->duration_minutes ?? $examObj['duration_minutes'] ?? $examObj->duration ?? $examObj['duration'] ?? null;
 
   $attemptsLimit = $attemptsLimit ?? ($examObj->max_attempts ?? $examObj['max_attempts'] ?? $examObj->attempts_limit ?? $examObj['attempts_limit'] ?? null);
-  $attemptsUsed  = $attemptsUsed ?? ($examObj->attempts_used ?? $examObj['attempts_used'] ?? null);
+  $attemptsUsed = $attemptsUsed ?? ($examObj->attempts_used ?? $examObj['attempts_used'] ?? null);
   $attemptsRemaining = $attemptsRemaining ?? (is_numeric($attemptsLimit) && is_numeric($attemptsUsed) ? max(0, $attemptsLimit - $attemptsUsed) : null);
 
   // Room context (when opened from ExamRoomController@room)
@@ -25,7 +25,7 @@
 
   // URLs
   $introUrl = $examId ? route('student.exams.intro', $examId) : route('student.exams.index');
-  $roomUrl  = $activeAttemptId ? route('student.attempts.room', ['attempt' => $activeAttemptId]) : null;
+  $roomUrl = $activeAttemptId ? route('student.attempts.room', ['attempt' => $activeAttemptId]) : null;
 
   // Room endpoints
   $questionsEndpoint = $questionsEndpoint ?? ($examId ? url("/student/exams/{$examId}/questions") : null);
@@ -41,38 +41,48 @@
   @push('head')
     <style>
       /* Room-only UI (uses layout tokens: --stu-radius, etc.) */
-      .room-shell{
+      .room-shell {
         display: grid;
         grid-template-columns: 320px 1fr;
         gap: 14px;
       }
-      @media (max-width: 992px){
-        .room-shell{ grid-template-columns: 1fr; }
+
+      @media (max-width: 992px) {
+        .room-shell {
+          grid-template-columns: 1fr;
+        }
       }
 
-      .room-topbar{
-        background: linear-gradient(135deg, rgba(13,110,253,.10), rgba(25,135,84,.08));
+      .room-topbar {
+        background: linear-gradient(135deg, rgba(13, 110, 253, .10), rgba(25, 135, 84, .08));
         border: 1px solid var(--stu-border);
         border-radius: var(--stu-radius);
         padding: 14px;
       }
 
-      .q-nav{ position: sticky; top: 12px; }
-      @media (max-width: 992px){
-        .q-nav{ position: relative; top: auto; }
+      .q-nav {
+        position: sticky;
+        top: 12px;
       }
 
-      .q-nav .q-nav-list{
+      @media (max-width: 992px) {
+        .q-nav {
+          position: relative;
+          top: auto;
+        }
+      }
+
+      .q-nav .q-nav-list {
         max-height: calc(100vh - 260px);
         overflow: auto;
         padding-bottom: 4px;
       }
 
-      .q-pill{
+      .q-pill {
         width: 44px;
         height: 40px;
         border-radius: 14px;
-        border: 1px solid rgba(15,23,42,.12);
+        border: 1px solid rgba(15, 23, 42, .12);
         background: #fff;
         display: inline-flex;
         align-items: center;
@@ -82,78 +92,136 @@
         user-select: none;
         transition: transform .12s ease, background .12s ease, border-color .12s ease;
       }
-      .q-pill:hover{ background: rgba(13,110,253,.06); border-color: rgba(13,110,253,.25); transform: translateY(-1px); }
-      .q-pill.is-active{ background: rgba(13,110,253,.12); border-color: rgba(13,110,253,.35); color: #0d6efd; }
-      .q-pill.is-answered{ background: rgba(25,135,84,.10); border-color: rgba(25,135,84,.25); color: #198754; }
 
-      .q-card{
-        border: 1px solid rgba(15,23,42,.08);
+      .q-pill:hover {
+        background: rgba(13, 110, 253, .06);
+        border-color: rgba(13, 110, 253, .25);
+        transform: translateY(-1px);
+      }
+
+      .q-pill.is-active {
+        background: rgba(13, 110, 253, .12);
+        border-color: rgba(13, 110, 253, .35);
+        color: #0d6efd;
+      }
+
+      .q-pill.is-answered {
+        background: rgba(25, 135, 84, .10);
+        border-color: rgba(25, 135, 84, .25);
+        color: #198754;
+      }
+
+      .q-card {
+        border: 1px solid rgba(15, 23, 42, .08);
         border-radius: var(--stu-radius);
         padding: 14px;
         background: #fff;
       }
-      .q-meta{ font-size: .88rem; color: rgba(15,23,42,.58); }
-      .q-prompt{ font-size: 1.05rem; font-weight: 950; letter-spacing: .2px; }
 
-      .opt-item{
-        border: 1px solid rgba(15,23,42,.10);
+      .q-meta {
+        font-size: .88rem;
+        color: rgba(15, 23, 42, .58);
+      }
+
+      .q-prompt {
+        font-size: 1.05rem;
+        font-weight: 950;
+        letter-spacing: .2px;
+      }
+
+      .opt-item {
+        border: 1px solid rgba(15, 23, 42, .10);
         border-radius: 16px;
         padding: 10px 12px;
         cursor: pointer;
         background: #fff;
         transition: background .12s ease, border-color .12s ease, transform .12s ease;
       }
-      .opt-item:hover{ background: rgba(13,110,253,.05); border-color: rgba(13,110,253,.22); transform: translateY(-1px); }
-      .opt-item.is-selected{ background: rgba(13,110,253,.10); border-color: rgba(13,110,253,.30); }
-      .opt-radio{ transform: scale(1.05); }
 
-      .loading-skeleton{
-        background: linear-gradient(90deg, rgba(15,23,42,.04), rgba(15,23,42,.07), rgba(15,23,42,.04));
+      .opt-item:hover {
+        background: rgba(13, 110, 253, .05);
+        border-color: rgba(13, 110, 253, .22);
+        transform: translateY(-1px);
+      }
+
+      .opt-item.is-selected {
+        background: rgba(13, 110, 253, .10);
+        border-color: rgba(13, 110, 253, .30);
+      }
+
+      .opt-radio {
+        transform: scale(1.05);
+      }
+
+      .loading-skeleton {
+        background: linear-gradient(90deg, rgba(15, 23, 42, .04), rgba(15, 23, 42, .07), rgba(15, 23, 42, .04));
         background-size: 200% 100%;
         animation: shimmer 1.1s infinite;
         border-radius: 14px;
         height: 18px;
       }
-      @keyframes shimmer{
-        0%{ background-position: 0% 0; }
-        100%{ background-position: 200% 0; }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 0% 0;
+        }
+
+        100% {
+          background-position: 200% 0;
+        }
       }
 
-      .timer-chip{
+      .timer-chip {
         font-variant-numeric: tabular-nums;
         letter-spacing: .2px;
         padding: 8px 10px;
         border-radius: 999px;
-        border: 1px solid rgba(15,23,42,.10);
-        background: rgba(255,255,255,.92);
+        border: 1px solid rgba(15, 23, 42, .10);
+        background: rgba(255, 255, 255, .92);
         font-weight: 950;
       }
 
-      .room-help{ color: rgba(15,23,42,.62); font-size: .9rem; }
+      .room-help {
+        color: rgba(15, 23, 42, .62);
+        font-size: .9rem;
+      }
 
-      .room-shortcuts .stu-kbd{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
+      .room-shortcuts .stu-kbd {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         min-width: 34px;
         padding: 6px 8px;
         border-radius: 10px;
-        border: 1px solid rgba(15,23,42,.12);
-        background: rgba(255,255,255,.92);
+        border: 1px solid rgba(15, 23, 42, .12);
+        background: rgba(255, 255, 255, .92);
         font-weight: 900;
         font-size: .85rem;
       }
-      .room-shortcuts .item{ display:flex; gap: 8px; align-items:center; color: rgba(15,23,42,.62); font-size: .9rem; }
-      .room-shortcuts .item + .item{ margin-top: 6px; }
 
-      .stu-divider{ border-top: 1px dashed rgba(15,23,42,.14); margin: 14px 0; }
+      .room-shortcuts .item {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        color: rgba(15, 23, 42, .62);
+        font-size: .9rem;
+      }
+
+      .room-shortcuts .item+.item {
+        margin-top: 6px;
+      }
+
+      .stu-divider {
+        border-top: 1px dashed rgba(15, 23, 42, .14);
+        margin: 14px 0;
+      }
     </style>
   @endpush
 
   @if($isRoom)
     {{-- =========================
-         EXAM ROOM (simple legacy view inside show)
-         ========================= --}}
+    EXAM ROOM (simple legacy view inside show)
+    ========================= --}}
     <div class="card student-card mb-3">
       <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div>
@@ -242,6 +310,9 @@
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="btnPrevQ">
                   {{ $isRtl ? '→' : '←' }} {{ __('Previous') }}
                 </button>
+                <button type="button" class="btn btn-primary btn-sm" id="btnAnswer">
+                  {{ __('Answer') }}
+                </button>
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="btnNextQ">
                   {{ __('Next') }} {{ $isRtl ? '←' : '→' }}
                 </button>
@@ -272,9 +343,12 @@
     @push('scripts')
       <script>
         (function () {
+          const attemptSession = @json($attempt->active_session_token ?? null);
+          const saveUrl = @json($attempt ? route('student.attempts.save', $attempt->id) : null);
+          const submitUrl = @json($attempt ? route('student.attempts.submit', $attempt->id) : null);
           const questionsEndpoint = @json($questionsEndpoint);
-          const initialRemainingSeconds = @json(is_numeric($remainingSeconds) ? (int)$remainingSeconds : null);
-          const isRtl = @json((bool)$isRtl);
+          const initialRemainingSeconds = @json(is_numeric($remainingSeconds) ? (int) $remainingSeconds : null);
+          const isRtl = @json((bool) $isRtl);
 
           const elTimerText = document.getElementById('roomTimerText');
           const elQCountText = document.getElementById('qCountText');
@@ -284,10 +358,12 @@
           const elQMetaText = document.getElementById('qMetaText');
           const btnPrevQ = document.getElementById('btnPrevQ');
           const btnNextQ = document.getElementById('btnNextQ');
+          const btnAnswer = document.getElementById('btnAnswer');
 
           let questions = [];
           let activeIndex = 0;
           let remaining = initialRemainingSeconds;
+          let isSaving = false;
 
           function pad2(n) { return String(n).padStart(2, '0'); }
           function formatTime(seconds) {
@@ -340,7 +416,14 @@
                 };
               }) : [];
 
-              const saved = q.saved_answer ?? q.savedAnswer ?? q.student_response ?? q.studentResponse ?? null;
+              // Parse saved answer safely
+              let saved = q.saved_answer ?? q.savedAnswer ?? q.student_response ?? q.studentResponse ?? null;
+              try {
+                if (typeof saved === 'string' && saved.startsWith('{')) {
+                  const parsed = JSON.parse(saved);
+                  saved = parsed.value ?? parsed.answer ?? parsed.selected ?? saved;
+                }
+              } catch (e) { }
 
               return {
                 id: qId,
@@ -362,15 +445,9 @@
           function isAnswered(q) {
             const v = q.saved_answer;
             if (v === null || typeof v === 'undefined') return false;
-            if (Array.isArray(v)) return v.length > 0;
-            if (typeof v === 'object') {
-              const keys = Object.keys(v || {});
-              if (keys.length === 0) return false;
-              for (const k of keys) if (v[k]) return true;
-              return false;
-            }
-            const s = String(v);
-            return s.trim().length > 0;
+            // Additional check for empty string
+            if (typeof v === 'string' && v.trim() === '') return false;
+            return true;
           }
 
           function renderNav() {
@@ -443,16 +520,7 @@
 
                 let isSelected = false;
                 if (selected !== null && typeof selected !== 'undefined') {
-                  if (Array.isArray(selected)) {
-                    isSelected = selected.map(String).includes(String(opt.id));
-                  } else if (typeof selected === 'object') {
-                    const candidates = [
-                      selected.option_id, selected.optionId, selected.selected, selected.value, selected.id
-                    ].filter(function (v) { return v !== null && typeof v !== 'undefined'; });
-                    isSelected = candidates.map(String).includes(String(opt.id));
-                  } else {
-                    isSelected = String(selected) === String(opt.id);
-                  }
+                  isSelected = String(selected) === String(opt.id);
                 }
 
                 if (isSelected) {
@@ -467,9 +535,13 @@
                 optRow.appendChild(input);
                 optRow.appendChild(txt);
 
-                optRow.addEventListener('click', function () {
+                optRow.addEventListener('change', function () {
                   q.saved_answer = String(opt.id ?? j);
-                  setTimeout(function () { renderNav(); renderViewer(); }, 0);
+                  renderNav(); // Update visual state locally
+                  // Remove 'is-selected' from others
+                  const siblings = list.querySelectorAll('.opt-item');
+                  siblings.forEach(el => el.classList.remove('is-selected'));
+                  optRow.classList.add('is-selected');
                 });
 
                 list.appendChild(optRow);
@@ -482,7 +554,19 @@
             elQViewer.appendChild(wrapper);
 
             btnPrevQ.disabled = activeIndex <= 0;
+            // btnNextQ is now just navigation, user might want to use "Answer" button to proceed
             btnNextQ.disabled = activeIndex >= (questions.length - 1);
+
+            // Update Answer/Finish button state and text
+            if (activeIndex === (questions.length - 1)) {
+              btnAnswer.textContent = '{{ __('Finish Exam') }}';
+              btnAnswer.classList.remove('btn-primary');
+              btnAnswer.classList.add('btn-success');
+            } else {
+              btnAnswer.textContent = '{{ __('Answer') }}';
+              btnAnswer.classList.remove('btn-success');
+              btnAnswer.classList.add('btn-primary');
+            }
           }
 
           function setActiveIndex(idx) {
@@ -495,16 +579,113 @@
               if (pills && pills[activeIndex]) {
                 pills[activeIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
               }
-            } catch (e) {}
+            } catch (e) { }
           }
 
-          function goPrev(){ setActiveIndex(activeIndex - 1); }
-          function goNext(){ setActiveIndex(activeIndex + 1); }
+          function goPrev() { setActiveIndex(activeIndex - 1); }
+          function goNext() { setActiveIndex(activeIndex + 1); }
+
+          async function onAnswerClick() {
+            if (isSaving) return;
+            const q = questions[activeIndex];
+            if (!q) return;
+
+            // If it's the last question, we just confirm finish? 
+            // The user said "Click to answer, and if last question, finish exam"
+            // So we should save the answer first if selected.
+
+            if (activeIndex === (questions.length - 1)) {
+              // Last question
+              if (q.saved_answer) {
+                await saveAnswer(q);
+              }
+              if (confirm('{{ __('Are you sure you want to finish the exam?') }}')) {
+                submitExam();
+              }
+              return;
+            }
+
+            // Normal question: Save and Next
+            if (!q.saved_answer) {
+              // If no answer selected, just go next? Or block?
+              // Usually allow skip. passing to next.
+              goNext();
+            } else {
+              await saveAnswer(q);
+              goNext();
+            }
+          }
+
+          async function saveAnswer(q) {
+            if (!saveUrl) return;
+            isSaving = true;
+            btnAnswer.disabled = true;
+
+            try {
+              const res = await fetch(saveUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                  'X-ATTEMPT-SESSION': attemptSession
+                },
+                body: JSON.stringify({
+                  question_id: q.id,
+                  response: { value: q.saved_answer }
+                })
+              });
+
+              if (!res.ok) {
+                console.error('Failed to save');
+                // Optional: show toast
+              }
+            } catch (e) {
+              console.error(e);
+            } finally {
+              isSaving = false;
+              btnAnswer.disabled = false;
+            }
+          }
+
+          async function submitExam() {
+            if (!submitUrl) return;
+            isSaving = true;
+            btnAnswer.disabled = true;
+            btnAnswer.textContent = '{{ __('Submitting...') }}';
+
+            try {
+              const res = await fetch(submitUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                  'X-ATTEMPT-SESSION': attemptSession
+                }
+              });
+
+              if (res.ok) {
+                window.location.href = "{{ route('student.exams.index') }}";
+              } else {
+                alert('{{ __('Failed to submit exam. Please try again.') }}');
+                btnAnswer.disabled = false;
+                btnAnswer.textContent = '{{ __('Finish Exam') }}';
+              }
+            } catch (e) {
+              console.error(e);
+              alert('{{ __('Error submitting exam.') }}');
+              btnAnswer.disabled = false;
+            } finally {
+              isSaving = false;
+            }
+          }
 
           btnPrevQ.addEventListener('click', goPrev);
           btnNextQ.addEventListener('click', goNext);
+          btnAnswer.addEventListener('click', onAnswerClick);
 
-          document.addEventListener('keydown', function(e){
+          document.addEventListener('keydown', function (e) {
             if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
 
             if (!isRtl) {
@@ -571,8 +752,8 @@
 
   @else
     {{-- =========================
-         EXAM DETAILS VIEW
-         ========================= --}}
+    EXAM DETAILS VIEW
+    ========================= --}}
     <div class="card student-card mb-4">
       <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div>
@@ -666,7 +847,7 @@
             <div class="h5 fw-bold mb-2">{{ __('Exam Info') }}</div>
             <ul class="list-unstyled mb-0 small text-muted">
               <li class="mb-2">🆔 <span class="text-dark">{{ $examId ?? '—' }}</span></li>
-              <li class="mb-2">⏱ <span class="text-dark">{{ $duration ? $duration.' '.__('min') : '—' }}</span></li>
+              <li class="mb-2">⏱ <span class="text-dark">{{ $duration ? $duration . ' ' . __('min') : '—' }}</span></li>
               <li class="mb-2">🎯 <span class="text-dark">{{ $attemptsLimit ?? '—' }}</span></li>
               <li class="mb-2">🔒 <span class="text-dark">{{ __('Hidden answers') }}</span></li>
             </ul>
