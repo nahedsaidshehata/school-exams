@@ -16,12 +16,13 @@ class QuestionController extends Controller
 {
     public function index(Request $request)
     {
-        $q          = trim((string) $request->query('q', ''));
-        $type       = (string) $request->query('type', '');
+        $q = trim((string) $request->query('q', ''));
+        $type = (string) $request->query('type', '');
         $difficulty = (string) $request->query('difficulty', '');
-        $subjectId  = (string) $request->query('material_id', '');
-        $sectionId  = (string) $request->query('section_id', '');
-        $lessonId   = (string) $request->query('lesson_id', '');
+        $subjectId = (string) $request->query('material_id', '');
+        $sectionId = (string) $request->query('section_id', '');
+        $lessonId = (string) $request->query('lesson_id', '');
+        $grade = (string) $request->query('grade', '');
 
         $query = Question::query()
             ->with(['lesson.section.material'])
@@ -31,12 +32,12 @@ class QuestionController extends Controller
         if ($q !== '') {
             $query->where(function ($qq) use ($q) {
                 $qq->where('prompt_en', 'like', "%{$q}%")
-                   ->orWhere('prompt_ar', 'like', "%{$q}%")
-                   ->orWhere('metadata', 'like', "%{$q}%")
-                   ->orWhereHas('lesson', function ($l) use ($q) {
-                       $l->where('title_en', 'like', "%{$q}%")
-                         ->orWhere('title_ar', 'like', "%{$q}%");
-                   });
+                    ->orWhere('prompt_ar', 'like', "%{$q}%")
+                    ->orWhere('metadata', 'like', "%{$q}%")
+                    ->orWhereHas('lesson', function ($l) use ($q) {
+                        $l->where('title_en', 'like', "%{$q}%")
+                            ->orWhere('title_ar', 'like', "%{$q}%");
+                    });
             });
         }
 
@@ -48,13 +49,17 @@ class QuestionController extends Controller
             $query->where('difficulty', strtoupper($difficulty));
         }
 
+        if ($grade !== '') {
+            $query->whereHas('lesson', fn($l) => $l->where('grade', $grade));
+        }
+
         if ($lessonId !== '') {
             $query->where('lesson_id', $lessonId);
         } else {
             if ($sectionId !== '') {
-                $query->whereHas('lesson', fn ($l) => $l->where('section_id', $sectionId));
+                $query->whereHas('lesson', fn($l) => $l->where('section_id', $sectionId));
             } elseif ($subjectId !== '') {
-                $query->whereHas('lesson.section', fn ($s) => $s->where('material_id', $subjectId));
+                $query->whereHas('lesson.section', fn($s) => $s->where('material_id', $subjectId));
             }
         }
 
@@ -81,21 +86,30 @@ class QuestionController extends Controller
         if ($sectionId !== '') {
             $lessonsQuery->where('section_id', $sectionId);
         } elseif ($subjectId !== '') {
-            $lessonsQuery->whereHas('section', fn ($s) => $s->where('material_id', $subjectId));
+            $lessonsQuery->whereHas('section', fn($s) => $s->where('material_id', $subjectId));
         }
         $lessons = $lessonsQuery->get();
+
+        $grades = Lesson::query()
+            ->select('grade')
+            ->distinct()
+            ->whereNotNull('grade')
+            ->orderBy('grade')
+            ->pluck('grade');
 
         return view('admin.questions.index', compact(
             'questions',
             'subjects',
             'sections',
             'lessons',
+            'grades',
             'q',
             'type',
             'difficulty',
             'subjectId',
             'sectionId',
-            'lessonId'
+            'lessonId',
+            'grade'
         ));
     }
 
@@ -103,6 +117,7 @@ class QuestionController extends Controller
     {
         $subjectId = (string) $request->query('material_id', '');
         $sectionId = (string) $request->query('section_id', '');
+        $grade = (string) $request->query('grade', '');
 
         $sectionsQuery = Section::query()
             ->select('id', 'material_id', 'title_en', 'title_ar')
@@ -117,16 +132,20 @@ class QuestionController extends Controller
             ->select('id', 'section_id', 'title_en', 'title_ar')
             ->orderByRaw('COALESCE(title_en, title_ar) ASC');
 
+        if ($grade !== '') {
+            $lessonsQuery->where('grade', $grade);
+        }
+
         if ($sectionId !== '') {
             $lessonsQuery->where('section_id', $sectionId);
         } elseif ($subjectId !== '') {
-            $lessonsQuery->whereHas('section', fn ($s) => $s->where('material_id', $subjectId));
+            $lessonsQuery->whereHas('section', fn($s) => $s->where('material_id', $subjectId));
         }
         $lessons = $lessonsQuery->get();
 
         return response()->json([
             'sections' => $sections,
-            'lessons'  => $lessons,
+            'lessons' => $lessons,
         ]);
     }
 
@@ -139,18 +158,18 @@ class QuestionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'lesson_id'   => 'required|uuid|exists:lessons,id',
-            'type'        => 'required|in:MCQ,TF,ESSAY,CLASSIFICATION,REORDER,FILL_BLANK',
-            'difficulty'  => 'required|in:EASY,MEDIUM,HARD',
-            'prompt_en'   => 'nullable|string',
-            'prompt_ar'   => 'required|string',
+            'lesson_id' => 'required|uuid|exists:lessons,id',
+            'type' => 'required|in:MCQ,TF,ESSAY,CLASSIFICATION,REORDER,FILL_BLANK',
+            'difficulty' => 'required|in:EASY,MEDIUM,HARD',
+            'prompt_en' => 'nullable|string',
+            'prompt_ar' => 'required|string',
 
             // ✅ options only forced for MCQ/TF (REORDER ممكن metadata)
-            'options'                 => 'required_if:type,MCQ,TF|array',
-            'options.*.content_en'    => 'nullable|string',
-            'options.*.content_ar'    => 'required_with:options|string',
-            'options.*.is_correct'    => 'sometimes|boolean',
-            'options.*.order_index'   => 'sometimes|integer',
+            'options' => 'required_if:type,MCQ,TF|array',
+            'options.*.content_en' => 'nullable|string',
+            'options.*.content_ar' => 'required_with:options|string',
+            'options.*.is_correct' => 'sometimes|boolean',
+            'options.*.order_index' => 'sometimes|integer',
 
             // ✅ metadata can be array
             'metadata' => 'nullable|array',
@@ -180,12 +199,12 @@ class QuestionController extends Controller
         DB::beginTransaction();
         try {
             $question = Question::create([
-                'lesson_id'   => $request->lesson_id,
-                'type'        => $request->type,
-                'difficulty'  => strtoupper($request->difficulty),
-                'prompt_en'   => (string) ($request->prompt_en ?? ''),
-                'prompt_ar'   => (string) ($request->prompt_ar ?? ''),
-                'metadata'    => $request->input('metadata', []),
+                'lesson_id' => $request->lesson_id,
+                'type' => $request->type,
+                'difficulty' => strtoupper($request->difficulty),
+                'prompt_en' => (string) ($request->prompt_en ?? ''),
+                'prompt_ar' => (string) ($request->prompt_ar ?? ''),
+                'metadata' => $request->input('metadata', []),
             ]);
 
             $this->syncOptions($question, $request);
@@ -216,17 +235,17 @@ class QuestionController extends Controller
     public function update(Request $request, Question $question)
     {
         $request->validate([
-            'lesson_id'   => 'required|uuid|exists:lessons,id',
-            'type'        => 'required|in:MCQ,TF,ESSAY,CLASSIFICATION,REORDER,FILL_BLANK',
-            'difficulty'  => 'required|in:EASY,MEDIUM,HARD',
-            'prompt_en'   => 'nullable|string',
-            'prompt_ar'   => 'required|string',
+            'lesson_id' => 'required|uuid|exists:lessons,id',
+            'type' => 'required|in:MCQ,TF,ESSAY,CLASSIFICATION,REORDER,FILL_BLANK',
+            'difficulty' => 'required|in:EASY,MEDIUM,HARD',
+            'prompt_en' => 'nullable|string',
+            'prompt_ar' => 'required|string',
 
             // ✅ options only forced for MCQ/TF
-            'options'               => 'required_if:type,MCQ,TF|array',
-            'options.*.content_en'  => 'nullable|string',
-            'options.*.content_ar'  => 'required_with:options|string',
-            'options.*.is_correct'  => 'sometimes|boolean',
+            'options' => 'required_if:type,MCQ,TF|array',
+            'options.*.content_en' => 'nullable|string',
+            'options.*.content_ar' => 'required_with:options|string',
+            'options.*.is_correct' => 'sometimes|boolean',
             'options.*.order_index' => 'sometimes|integer',
 
             'metadata' => 'nullable|array',
@@ -262,12 +281,12 @@ class QuestionController extends Controller
             }
 
             $question->update([
-                'lesson_id'   => $request->lesson_id,
-                'type'        => $request->type,
-                'difficulty'  => strtoupper($request->difficulty),
-                'prompt_en'   => (string) ($request->prompt_en ?? ''),
-                'prompt_ar'   => (string) ($request->prompt_ar ?? ''),
-                'metadata'    => $newMetadata,
+                'lesson_id' => $request->lesson_id,
+                'type' => $request->type,
+                'difficulty' => strtoupper($request->difficulty),
+                'prompt_en' => (string) ($request->prompt_en ?? ''),
+                'prompt_ar' => (string) ($request->prompt_ar ?? ''),
+                'metadata' => $newMetadata,
             ]);
 
             $this->syncOptions($question, $request);
@@ -317,14 +336,15 @@ class QuestionController extends Controller
         $question->options()->delete();
 
         $options = $request->input('options', []);
-        if (!is_array($options)) return;
+        if (!is_array($options))
+            return;
 
         foreach ($options as $index => $option) {
             QuestionOption::create([
                 'question_id' => $question->id,
-                'content_en'  => (string) ($option['content_en'] ?? ''),
-                'content_ar'  => (string) ($option['content_ar'] ?? ''),
-                'is_correct'  => (bool) ($option['is_correct'] ?? false),
+                'content_en' => (string) ($option['content_en'] ?? ''),
+                'content_ar' => (string) ($option['content_ar'] ?? ''),
+                'is_correct' => (bool) ($option['is_correct'] ?? false),
                 'order_index' => $option['order_index'] ?? $index,
             ]);
         }

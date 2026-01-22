@@ -16,13 +16,18 @@
 @section('content')
   @push('head')
     <style>
-      .table td, .table th { vertical-align: middle; }
+      .table td,
+      .table th {
+        vertical-align: middle;
+      }
+
       .truncate {
         max-width: 360px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
+
       .badge-pill {
         display: inline-flex;
         align-items: center;
@@ -31,23 +36,46 @@
         border-radius: 999px;
         font-size: .78rem;
         font-weight: 700;
-        border: 1px solid rgba(0,0,0,.08);
-        background: rgba(13,110,253,.08);
+        border: 1px solid rgba(0, 0, 0, .08);
+        background: rgba(13, 110, 253, .08);
         color: #0d6efd;
       }
-      .badge-soft { background: rgba(25,135,84,.10); color: #198754; }
-      .badge-warn { background: rgba(255,193,7,.18); color: #8a6d00; }
-      .badge-danger { background: rgba(220,53,69,.12); color: #dc3545; }
+
+      .badge-soft {
+        background: rgba(25, 135, 84, .10);
+        color: #198754;
+      }
+
+      .badge-warn {
+        background: rgba(255, 193, 7, .18);
+        color: #8a6d00;
+      }
+
+      .badge-danger {
+        background: rgba(220, 53, 69, .12);
+        color: #dc3545;
+      }
 
       .filter-card {
-        border: 1px solid rgba(0,0,0,.06);
+        border: 1px solid rgba(0, 0, 0, .06);
         border-radius: 16px;
         padding: 14px;
         background: #fff;
       }
-      .filter-actions .btn { border-radius: 12px; }
-      .small-help { font-size: .86rem; color: #6c757d; }
-      .action-btns .btn { padding: .28rem .5rem; border-radius: 10px; }
+
+      .filter-actions .btn {
+        border-radius: 12px;
+      }
+
+      .small-help {
+        font-size: .86rem;
+        color: #6c757d;
+      }
+
+      .action-btns .btn {
+        padding: .28rem .5rem;
+        border-radius: 10px;
+      }
     </style>
   @endpush
 
@@ -78,9 +106,8 @@
 
           <div class="col-12 col-lg-4">
             <label class="form-label">{{ __('Search') }}</label>
-            <input type="text" class="form-control" name="q"
-                   value="{{ request('q') }}"
-                   placeholder="{{ __('Search prompt, lesson, metadata...') }}">
+            <input type="text" class="form-control" name="q" value="{{ request('q') }}"
+              placeholder="{{ __('Search prompt, lesson, metadata...') }}">
             <div class="small-help mt-1">{{ __('Search in EN/AR prompt, lesson title, metadata.') }}</div>
           </div>
 
@@ -88,8 +115,8 @@
             <label class="form-label">{{ __('Type') }}</label>
             <select class="form-select" name="type" id="typeSelect">
               <option value="">{{ __('All') }}</option>
-              @foreach(['MCQ','TF','ESSAY','CLASSIFICATION','REORDER','FILL_BLANK'] as $t)
-                <option value="{{ $t }}" {{ request('type')===$t ? 'selected' : '' }}>{{ $t }}</option>
+              @foreach(['MCQ', 'TF', 'ESSAY', 'CLASSIFICATION', 'REORDER', 'FILL_BLANK'] as $t)
+                <option value="{{ $t }}" {{ request('type') === $t ? 'selected' : '' }}>{{ $t }}</option>
               @endforeach
             </select>
           </div>
@@ -98,9 +125,21 @@
             <label class="form-label">{{ __('Difficulty') }}</label>
             <select class="form-select" name="difficulty" id="difficultySelect">
               <option value="">{{ __('All') }}</option>
-              @foreach(['EASY','MEDIUM','HARD'] as $d)
-                <option value="{{ $d }}" {{ strtoupper((string)request('difficulty'))===$d ? 'selected' : '' }}>
+              @foreach(['EASY', 'MEDIUM', 'HARD'] as $d)
+                <option value="{{ $d }}" {{ strtoupper((string) request('difficulty')) === $d ? 'selected' : '' }}>
                   {{ ucfirst(strtolower($d)) }}
+                </option>
+              @endforeach
+            </select>
+          </div>
+
+          <div class="col-6 col-lg-2">
+            <label class="form-label">{{ __('Grade') }}</label>
+            <select class="form-select" name="grade" id="gradeSelect">
+              <option value="">{{ __('All') }}</option>
+              @foreach(($grades ?? []) as $g)
+                <option value="{{ $g }}" {{ request('grade') === $g ? 'selected' : '' }}>
+                  {{ $g }}
                 </option>
               @endforeach
             </select>
@@ -115,14 +154,14 @@
                 @php
                   $label = $subj->name_en ?? $subj->name_ar ?? 'Subject';
                 @endphp
-                <option value="{{ $subj->id }}" {{ request('material_id')===$subj->id ? 'selected' : '' }}>
+                <option value="{{ $subj->id }}" {{ request('material_id') === $subj->id ? 'selected' : '' }}>
                   {{ $label }}
                 </option>
               @endforeach
             </select>
           </div>
 
-          <div class="col-6 col-lg-2">
+          <div class="col-6 col-lg-3">
             <label class="form-label">{{ __('Section') }}</label>
             <select class="form-select" name="section_id" id="sectionSelect">
               <option value="">{{ __('All') }}</option>
@@ -131,7 +170,7 @@
                   // ✅ sections table uses title_en/title_ar
                   $label = $sec->title_en ?? $sec->title_ar ?? 'Section';
                 @endphp
-                <option value="{{ $sec->id }}" {{ request('section_id')===$sec->id ? 'selected' : '' }}>
+                <option value="{{ $sec->id }}" {{ request('section_id') === $sec->id ? 'selected' : '' }}>
                   {{ $label }}
                 </option>
               @endforeach
@@ -146,14 +185,14 @@
                 @php
                   $label = $les->title_en ?? $les->title_ar ?? 'Lesson';
                 @endphp
-                <option value="{{ $les->id }}" {{ request('lesson_id')===$les->id ? 'selected' : '' }}>
+                <option value="{{ $les->id }}" {{ request('lesson_id') === $les->id ? 'selected' : '' }}>
                   {{ $label }}
                 </option>
               @endforeach
             </select>
           </div>
 
-          <div class="col-12 col-lg-8 filter-actions d-flex gap-2 justify-content-end">
+          <div class="col-12 col-lg-5 filter-actions d-flex gap-2 justify-content-end ms-auto">
             <button type="submit" class="btn btn-primary">
               {{ __('Apply Filters') }}
             </button>
@@ -251,6 +290,7 @@
         const subjectSelect = document.getElementById('subjectSelect');
         const sectionSelect = document.getElementById('sectionSelect');
         const lessonSelect  = document.getElementById('lessonSelect');
+        const gradeSelect   = document.getElementById('gradeSelect');
 
         const filtersUrl = @json(route('admin.questions.filters'));
 
@@ -271,48 +311,52 @@
 
           if ([...selectEl.options].some(o => o.value === current)) {
             selectEl.value = current;
+          } else {
+             selectEl.value = '';
           }
         }
 
-        async function refreshBySubject() {
-          const materialId = subjectSelect.value || '';
-          const url = new URL(filtersUrl, window.location.origin);
-          if (materialId) url.searchParams.set('material_id', materialId);
+        async function fetchFilters() {
+             const url = new URL(filtersUrl, window.location.origin);
+             if (subjectSelect && subjectSelect.value) url.searchParams.set('material_id', subjectSelect.value);
+             if (sectionSelect && sectionSelect.value) url.searchParams.set('section_id', sectionSelect.value);
+             if (gradeSelect   && gradeSelect.value)   url.searchParams.set('grade', gradeSelect.value);
 
-          const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-          const data = await res.json();
-
-          setOptions(sectionSelect, data.sections, 'All', (s) => (s.title_en || s.title_ar || 'Section'));
-          sectionSelect.value = '';
-
-          setOptions(lessonSelect, data.lessons, 'All', (l) => (l.title_en || l.title_ar || 'Lesson'));
-          lessonSelect.value = '';
+             const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+             return await res.json();
         }
 
-        async function refreshBySection() {
-          const materialId = subjectSelect.value || '';
-          const sectionId = sectionSelect.value || '';
+        async function onSubjectChange() {
+          // Reset dependent fields
+          if (sectionSelect) sectionSelect.value = '';
+          if (lessonSelect)  lessonSelect.value = '';
 
-          const url = new URL(filtersUrl, window.location.origin);
-          if (materialId) url.searchParams.set('material_id', materialId);
-          if (sectionId) url.searchParams.set('section_id', sectionId);
+          const data = await fetchFilters();
 
-          const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-          const data = await res.json();
-
-          if (materialId) {
-            setOptions(sectionSelect, data.sections, 'All', (s) => (s.title_en || s.title_ar || 'Section'));
-            if (sectionId && [...sectionSelect.options].some(o => o.value === sectionId)) {
-              sectionSelect.value = sectionId;
-            }
+          if (sectionSelect) {
+             setOptions(sectionSelect, data.sections, 'All', (s) => (s.title_en || s.title_ar || 'Section'));
           }
-
-          setOptions(lessonSelect, data.lessons, 'All', (l) => (l.title_en || l.title_ar || 'Lesson'));
-          lessonSelect.value = '';
+          if (lessonSelect) {
+             setOptions(lessonSelect, data.lessons, 'All', (l) => (l.title_en || l.title_ar || 'Lesson'));
+          }
         }
 
-        if (subjectSelect) subjectSelect.addEventListener('change', refreshBySubject);
-        if (sectionSelect) sectionSelect.addEventListener('change', refreshBySection);
+        async function onFilterChange() {
+          // For Section or Grade change, we mainly update Lessons.
+          // Sections list depends only on Subject, so it doesn't change here.
+          
+          // Clear lesson if Section changed? Not necessarily, but if the current lesson doesn't belong to new section, it will be cleared by setOptions check.
+          
+          const data = await fetchFilters();
+          
+          if (lessonSelect) {
+             setOptions(lessonSelect, data.lessons, 'All', (l) => (l.title_en || l.title_ar || 'Lesson'));
+          }
+        }
+
+        if (subjectSelect) subjectSelect.addEventListener('change', onSubjectChange);
+        if (sectionSelect) sectionSelect.addEventListener('change', onFilterChange); // Update lessons
+        if (gradeSelect)   gradeSelect.addEventListener('change', onFilterChange);   // Update lessons
       });
     </script>
   @endpush
