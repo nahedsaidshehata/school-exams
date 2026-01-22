@@ -26,6 +26,9 @@
   // URLs
   $introUrl = $examId ? route('student.exams.intro', $examId) : route('student.exams.index');
   $roomUrl = $activeAttemptId ? route('student.attempts.room', ['attempt' => $activeAttemptId]) : null;
+  $startUrl = $examId ? route('student.exams.start', $examId) : route('student.exams.index');
+
+  $canStart = is_null($attemptsRemaining) ? true : ($attemptsRemaining > 0);
 
   // Room endpoints
   $questionsEndpoint = $questionsEndpoint ?? ($examId ? url("/student/exams/{$examId}/questions") : null);
@@ -796,31 +799,49 @@
           <div class="card-body">
             <div class="h5 fw-bold mb-2">{{ __('Overview') }}</div>
 
-            @if($desc)
-              <div class="text-muted small mb-1">{{ __('Description') }}</div>
-              <div class="content">{{ $desc }}</div>
-            @else
-              <div class="text-muted">
-                {{ __('Review instructions on the next step before starting.') }}
-              </div>
-            @endif
+            <div class="sp-card-title mb-2">{{ __('Instructions') }}</div>
 
-            <hr class="soft-divider my-3">
+            <ul class="instruction-list mb-0" style="padding-inline-start: 1.2rem;">
+              <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
+                {{ __('Do not refresh the page during the exam.') }}
+              </li>
+              <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
+                {{ __('Your answers are saved automatically.') }}
+              </li>
+              <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
+                {{ __('If time ends, your attempt will be submitted automatically.') }}
+              </li>
+              <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
+                {{ __('Grades and correct answers are not shown to students.') }}
+              </li>
+            </ul>
 
-            <div class="d-flex flex-wrap gap-2">
+            <hr class="soft-divider my-3" style="border-top: 1px dashed rgba(15,23,42,.14);">
+
+            <div class="d-flex flex-wrap gap-2 align-items-center">
               @if($roomUrl)
-                <a href="{{ $roomUrl }}" class="btn btn-primary">
-                  ▶️ {{ __('Continue Attempt') }}
+                <a href="{{ $roomUrl }}" class="btn btn-primary btn-wide" style="min-width: 190px;">
+                  {{ __('Continue Exam') }}
                 </a>
+              @else
+                <form method="POST" action="{{ $startUrl }}" class="m-0">
+                  @csrf
+                  <button type="submit" class="btn btn-primary btn-wide" style="min-width: 190px;" @if(!$canStart) disabled
+                  @endif>
+                    {{ __('Start Exam') }}
+                  </button>
+                </form>
               @endif
 
-              <a href="{{ $introUrl }}" class="btn btn-outline-primary">
-                📌 {{ __('Go to Instructions') }}
-              </a>
+              @if(!$roomUrl && !$canStart)
+                <div class="d-inline-block text-danger small ms-2">
+                  {{ __('Max attempts reached') }}
+                </div>
+              @endif
             </div>
 
             <div class="text-muted small mt-3">
-              {{ __('Grades and correct answers are not displayed for students.') }}
+              {{ __('No grades will be shown after submission.') }}
             </div>
           </div>
         </div>
@@ -854,21 +875,7 @@
           </div>
         </div>
 
-        <div class="card student-card mt-3">
-          <div class="card-body">
-            <div class="h5 fw-bold mb-2">{{ __('Next step') }}</div>
-            <div class="text-muted small">
-              {{ __('Open instructions, then press Start. If you already started, continue the attempt.') }}
-            </div>
 
-            <div class="mt-3 d-grid gap-2">
-              @if($roomUrl)
-                <a href="{{ $roomUrl }}" class="btn btn-primary">{{ __('Continue Attempt') }}</a>
-              @endif
-              <a href="{{ $introUrl }}" class="btn btn-outline-primary">{{ __('Instructions') }}</a>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   @endif

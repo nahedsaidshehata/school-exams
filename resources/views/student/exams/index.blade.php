@@ -18,17 +18,14 @@
       <div class="stu-subtitle">{{ __('Find and open available exams. No grades are shown to students.') }}</div>
     </div>
 
-    <form method="GET" action="{{ route('student.exams.index') }}" class="d-flex flex-wrap gap-2" style="max-width: 560px; width: 100%;">
+    <form method="GET" action="{{ route('student.exams.index') }}" class="d-flex flex-wrap gap-2"
+      style="max-width: 560px; width: 100%;">
       <input type="hidden" name="status" value="{{ $status }}">
 
       <div class="input-group">
         <span class="input-group-text">🔎</span>
-        <input type="search"
-               name="q"
-               value="{{ $q }}"
-               class="form-control"
-               placeholder="{{ __('Search exams...') }}"
-               aria-label="{{ __('Search exams...') }}">
+        <input type="search" name="q" value="{{ $q }}" class="form-control" placeholder="{{ __('Search exams...') }}"
+          aria-label="{{ __('Search exams...') }}">
       </div>
 
       <button class="btn btn-primary" type="submit">{{ __('Search') }}</button>
@@ -41,7 +38,7 @@
       $chips = [
         'all' => __('All'),
         'available' => __('Available'),
-        'active' => __('Active'),
+        //        'active' => __('Active'),
         'submitted' => __('Submitted'),
         'expired' => __('Expired'),
       ];
@@ -49,7 +46,7 @@
 
     @foreach($chips as $key => $label)
       <a class="filter-chip {{ $status === $key ? 'active' : '' }}"
-         href="{{ route('student.exams.index') . '?status=' . urlencode($key) . '&q=' . urlencode($q) }}">
+        href="{{ route('student.exams.index') . '?status=' . urlencode($key) . '&q=' . urlencode($q) }}">
         {{ $label }}
       </a>
     @endforeach
@@ -64,15 +61,17 @@
         $title = $exam->title_en ?? $exam['title']['en'] ?? __('Exam');
         $duration = $exam->duration_minutes ?? $exam['duration_minutes'] ?? $exam->duration ?? $exam['duration'] ?? null;
 
-        $windowStart = $exam->start_at ?? $exam['start_at'] ?? null;
-        $windowEnd   = $exam->end_at ?? $exam['end_at'] ?? null;
+        $windowStart = $exam->starts_at ?? $exam['starts_at'] ?? $exam->start_at ?? $exam['start_at'] ?? null;
+        $windowEnd = $exam->ends_at ?? $exam['ends_at'] ?? $exam->end_at ?? $exam['end_at'] ?? null;
 
         $badge = $exam->status ?? $exam['status'] ?? $status;
-        $badgeClass = match($badge) {
+        $badgeClass = match ($badge) {
           'available' => 'badge-soft-success',
           'active' => 'badge-soft-primary',
           'submitted' => 'badge-soft-info',
           'expired' => 'badge-soft-secondary',
+          'upcoming' => 'badge-soft-primary',
+          'locked' => 'badge-soft-danger',
           default => 'badge-soft-secondary'
         };
 
@@ -101,7 +100,7 @@
                 </div>
               </div>
 
-              <span class="badge {{ $badgeClass }} px-3 py-2">{{ ucfirst((string)$badge) }}</span>
+              <span class="badge {{ $badgeClass }} px-3 py-2">{{ ucfirst((string) $badge) }}</span>
             </div>
 
             <hr class="soft-divider my-3">
