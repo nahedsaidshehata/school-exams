@@ -157,7 +157,7 @@
                             </div>
                             <div class="col-12 col-md-6">
                                 <label for="title_en" class="form-label">
-                                    {{ __('Title (English)') }} <span class="req">*</span>
+                                    {{ __('Title (English)') }} <span class="req"></span>
                                 </label>
                                 <input
                                     type="text"
@@ -165,7 +165,6 @@
                                     name="title_en"
                                     value="{{ old('title_en', $lesson->title_en) }}"
                                     class="form-control @error('title_en') is-invalid @enderror"
-                                    required
                                     autocomplete="off"
                                 >
                                 @error('title_en')
@@ -174,7 +173,7 @@
 
                             <div class="col-12 col-md-6">
                                 <label for="title_ar" class="form-label">
-                                    {{ __('Title (Arabic)') }} <span class="req">*</span>
+                                    {{ __('Title (Arabic)') }} <span class="req"></span>
                                 </label>
                                 <input
                                     type="text"
@@ -182,7 +181,6 @@
                                     name="title_ar"
                                     value="{{ old('title_ar', $lesson->title_ar) }}"
                                     class="form-control @error('title_ar') is-invalid @enderror"
-                                    required
                                     autocomplete="off"
                                 >
                                 @error('title_ar')

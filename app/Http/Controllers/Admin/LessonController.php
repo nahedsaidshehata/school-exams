@@ -185,8 +185,8 @@ class LessonController extends Controller
         $data = $request->validate([
             'material_id' => 'nullable|uuid|exists:materials,id',
             'section_id' => 'required|uuid|exists:sections,id',
-            'title_en' => 'required|string|max:255',
-            'title_ar' => 'required|string|max:255',
+            'title_en' => 'nullable|string|max:255|required_without:title_ar|min:3|max:255',
+            'title_ar' => 'nullable|string|max:255|required_without:title_en|min:3|max:255',
             'content_ar' => ['nullable', 'string'],
             'grade' => 'required|numeric',
             'content_en' => ['nullable', 'string'],

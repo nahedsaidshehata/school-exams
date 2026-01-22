@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title_en');
             $table->string('title_ar');
             $table->timestamps();
-            
+
             $table->foreign('section_id')->references('id')->on('sections')->onDelete('cascade');
         });
     }
