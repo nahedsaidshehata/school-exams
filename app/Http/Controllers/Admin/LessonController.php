@@ -19,9 +19,9 @@ class LessonController extends Controller
     public function index(Request $request)
     {
         $filters = [
-            'material_id' => trim((string) $request->query('material_id', '')),
-            'section_id'  => trim((string) $request->query('section_id', '')),
-            'q'           => trim((string) $request->query('q', '')),
+            'material_id' => trim((string)$request->query('material_id', '')),
+            'section_id' => trim((string)$request->query('section_id', '')),
+            'q' => trim((string)$request->query('q', '')),
         ];
 
         $query = Lesson::query()
@@ -45,15 +45,15 @@ class LessonController extends Controller
             $q = $filters['q'];
             $query->where(function ($w) use ($q) {
                 $w->where('title_en', 'like', "%{$q}%")
-                  ->orWhere('title_ar', 'like', "%{$q}%")
-                  ->orWhereHas('section', function ($s) use ($q) {
-                      $s->where('title_en', 'like', "%{$q}%")
-                        ->orWhere('title_ar', 'like', "%{$q}%")
-                        ->orWhereHas('material', function ($m) use ($q) {
-                            $m->where('name_en', 'like', "%{$q}%")
-                              ->orWhere('name_ar', 'like', "%{$q}%");
-                        });
-                  });
+                    ->orWhere('title_ar', 'like', "%{$q}%")
+                    ->orWhereHas('section', function ($s) use ($q) {
+                        $s->where('title_en', 'like', "%{$q}%")
+                            ->orWhere('title_ar', 'like', "%{$q}%")
+                            ->orWhereHas('material', function ($m) use ($q) {
+                                $m->where('name_en', 'like', "%{$q}%")
+                                    ->orWhere('name_ar', 'like', "%{$q}%");
+                            });
+                    });
             });
         }
 
@@ -79,9 +79,9 @@ class LessonController extends Controller
             $pagination = view('admin.lessons.partials.pagination', compact('lessons'))->render();
 
             return response()->json([
-                'tbody'      => $tbody,
+                'tbody' => $tbody,
                 'pagination' => $pagination,
-                'total'      => method_exists($lessons, 'total') ? $lessons->total() : 0,
+                'total' => method_exists($lessons, 'total') ? $lessons->total() : 0,
             ]);
         }
 
@@ -117,12 +117,13 @@ class LessonController extends Controller
     {
         $data = $request->validate([
             'material_id' => 'required|uuid|exists:materials,id',
-            'section_id'  => 'required|uuid|exists:sections,id',
-            'title_en'    => 'required|string|max:255',
-            'title_ar'    => 'required|string|max:255',
-            'content_ar'  => ['nullable', 'string'],
-            'content_en'  => ['nullable', 'string'],
-            'learning_outcome_ids'   => ['nullable', 'array'],
+            'section_id' => 'required|uuid|exists:sections,id',
+            'title_en' => 'nullable|string|max:255|required_without:title_ar|min:3|max:255',
+            'title_ar' => 'nullable|string|max:255|required_without:title_en|min:3|max:255',
+            'grade' => 'required|numeric',
+            'content_ar' => ['nullable', 'string'],
+            'content_en' => ['nullable', 'string'],
+            'learning_outcome_ids' => ['nullable', 'array'],
             'learning_outcome_ids.*' => ['uuid', 'exists:learning_outcomes,id'],
         ]);
 
@@ -138,8 +139,9 @@ class LessonController extends Controller
 
         $lessonData = [
             'section_id' => $data['section_id'],
-            'title_en'   => $data['title_en'],
-            'title_ar'   => $data['title_ar'],
+            'title_en' => $data['title_en'],
+            'title_ar' => $data['title_ar'],
+            'grade' => $data['grade'],
             'content_ar' => $data['content_ar'] ?? null,
             'content_en' => $data['content_en'] ?? null,
         ];
@@ -183,11 +185,12 @@ class LessonController extends Controller
         $data = $request->validate([
             'material_id' => 'nullable|uuid|exists:materials,id',
             'section_id' => 'required|uuid|exists:sections,id',
-            'title_en'   => 'required|string|max:255',
-            'title_ar'   => 'required|string|max:255',
+            'title_en' => 'required|string|max:255',
+            'title_ar' => 'required|string|max:255',
             'content_ar' => ['nullable', 'string'],
+            'grade' => 'required|numeric',
             'content_en' => ['nullable', 'string'],
-            'learning_outcome_ids'   => ['nullable', 'array'],
+            'learning_outcome_ids' => ['nullable', 'array'],
             'learning_outcome_ids.*' => ['uuid', 'exists:learning_outcomes,id'],
         ]);
 
@@ -212,8 +215,9 @@ class LessonController extends Controller
 
         $updateData = [
             'section_id' => $data['section_id'],
-            'title_en'   => $data['title_en'],
-            'title_ar'   => $data['title_ar'],
+            'title_en' => $data['title_en'],
+            'title_ar' => $data['title_ar'],
+            'grade' => $data['grade'],
             'content_ar' => $incomingAr,
             'content_en' => $incomingEn,
         ];
@@ -243,7 +247,7 @@ class LessonController extends Controller
             ->with('success', 'Lesson deleted successfully.');
     }
 
-    public function show(\App\Models\Lesson $lesson)
+    public function show(Lesson $lesson)
     {
         $lesson->load([
             'section.material',

@@ -19,6 +19,7 @@ class Lesson extends Model
         'title_ar',
         'content_ar',
         'content_en',
+        'grade',
         'content_updated_at',
     ];
 
