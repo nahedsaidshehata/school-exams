@@ -424,459 +424,568 @@
               try {
                 if (typeof saved === 'string' && saved.startsWith('{')) {
                   const parsed = JSON.parse(saved);
-                  saved = parsed.value ?? parsed.answer ?? parsed.selected ?? saved;
-                }
-              } catch (e) { }
+                  // Check for REORDER 'order' array or other value keys
+                  saved = parsed.value ?? parsed.answer ?? parsed.selected ?? parsed.order ?? saved;
+                      }
+                    } catch (e) { }
 
-              return {
-                id: qId,
-                order_index: orderIndex,
-                type: q.type ?? null,
-                difficulty: q.difficulty ?? null,
-                prompt_ar: q.prompt_ar ?? q.promptAr ?? null,
-                prompt_en: q.prompt_en ?? q.promptEn ?? null,
-                options: options,
-                saved_answer: saved
-              };
-            }).sort(function (a, b) {
-              const ax = parseInt(a.order_index, 10) || 0;
-              const bx = parseInt(b.order_index, 10) || 0;
-              return ax - bx;
-            });
-          }
-
-          function isAnswered(q) {
-            const v = q.saved_answer;
-            if (v === null || typeof v === 'undefined') return false;
-            // Additional check for empty string
-            if (typeof v === 'string' && v.trim() === '') return false;
-            return true;
-          }
-
-          function renderNav() {
-            elQNavList.innerHTML = '';
-            const frag = document.createDocumentFragment();
-
-            questions.forEach(function (q, idx) {
-              const pill = document.createElement('button');
-              pill.type = 'button';
-              pill.className = 'q-pill';
-              pill.textContent = String(idx + 1);
-
-              if (idx === activeIndex) pill.classList.add('is-active');
-              if (isAnswered(q)) pill.classList.add('is-answered');
-
-              pill.addEventListener('click', function () { setActiveIndex(idx); });
-              frag.appendChild(pill);
-            });
-
-            elQNavList.appendChild(frag);
-            elQCountText.textContent = `${questions.length} ${questions.length === 1 ? '{{ __('question') }}' : '{{ __('questions') }}'}`;
-          }
-
-          function renderViewer() {
-            const q = questions[activeIndex];
-            if (!q) return;
-
-            const prompt = getPrompt(q);
-            elQActiveIndexText.textContent = `${activeIndex + 1} / ${questions.length}`;
-
-            const parts = [];
-            if (q.type) parts.push(String(q.type));
-            if (q.difficulty) parts.push(String(q.difficulty));
-            elQMetaText.textContent = parts.length ? parts.join(' • ') : '—';
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'q-card';
-
-            const promptEl = document.createElement('div');
-            promptEl.className = 'q-prompt mb-2';
-            promptEl.textContent = prompt || '—';
-            wrapper.appendChild(promptEl);
-
-            const opts = Array.isArray(q.options) ? q.options.slice().sort(function (a, b) {
-              const ax = parseInt(a.order_index, 10) || 0;
-              const bx = parseInt(b.order_index, 10) || 0;
-              return ax - bx;
-            }) : [];
-
-            if (!opts.length) {
-              const empty = document.createElement('div');
-              empty.className = 'text-muted';
-              empty.textContent = '{{ __('No options found for this question.') }}';
-              wrapper.appendChild(empty);
-            } else {
-              const list = document.createElement('div');
-              list.className = 'd-grid gap-2 mt-3';
-
-              const selected = q.saved_answer;
-
-              opts.forEach(function (opt, j) {
-                const optRow = document.createElement('label');
-                optRow.className = 'opt-item d-flex gap-2 align-items-start';
-
-                const input = document.createElement('input');
-                input.className = 'form-check-input opt-radio mt-1';
-                input.type = 'radio';
-                input.name = 'q_' + String(q.id ?? activeIndex);
-                input.value = String(opt.id ?? j);
-
-                let isSelected = false;
-                if (selected !== null && typeof selected !== 'undefined') {
-                  isSelected = String(selected) === String(opt.id);
+                    return {
+                      id: qId,
+                      order_index: orderIndex,
+                      type: q.type ?? null,
+                      difficulty: q.difficulty ?? null,
+                      prompt_ar: q.prompt_ar ?? q.promptAr ?? null,
+                      prompt_en: q.prompt_en ?? q.promptEn ?? null,
+                      options: options,
+                      saved_answer: saved
+                    };
+                  }).sort(function (a, b) {
+                    const ax = parseInt(a.order_index, 10) || 0;
+                    const bx = parseInt(b.order_index, 10) || 0;
+                    return ax - bx;
+                  });
                 }
 
-                if (isSelected) {
-                  input.checked = true;
-                  optRow.classList.add('is-selected');
+                function isAnswered(q) {
+                  const v = q.saved_answer;
+                  if (v === null || typeof v === 'undefined') return false;
+                  // Additional check for empty string
+                  if (typeof v === 'string' && v.trim() === '') return false;
+                  return true;
                 }
 
-                const txt = document.createElement('div');
-                txt.className = 'flex-grow-1';
-                txt.textContent = getOptionText(opt);
+                function renderNav() {
+                  elQNavList.innerHTML = '';
+                  const frag = document.createDocumentFragment();
 
-                optRow.appendChild(input);
-                optRow.appendChild(txt);
+                  questions.forEach(function (q, idx) {
+                    const pill = document.createElement('button');
+                    pill.type = 'button';
+                    pill.className = 'q-pill';
+                    pill.textContent = String(idx + 1);
 
-                optRow.addEventListener('change', function () {
-                  q.saved_answer = String(opt.id ?? j);
-                  renderNav(); // Update visual state locally
-                  // Remove 'is-selected' from others
-                  const siblings = list.querySelectorAll('.opt-item');
-                  siblings.forEach(el => el.classList.remove('is-selected'));
-                  optRow.classList.add('is-selected');
+                    if (idx === activeIndex) pill.classList.add('is-active');
+                    if (isAnswered(q)) pill.classList.add('is-answered');
+
+                    pill.addEventListener('click', function () { setActiveIndex(idx); });
+                    frag.appendChild(pill);
+                  });
+
+                  elQNavList.appendChild(frag);
+                  elQCountText.textContent = `${questions.length} ${questions.length === 1 ? '{{ __('question') }}' : '{{ __('questions') }}'}`;
+                }
+
+                function renderViewer() {
+                  const q = questions[activeIndex];
+                  if (!q) return;
+
+                  const prompt = getPrompt(q);
+                  elQActiveIndexText.textContent = `${activeIndex + 1} / ${questions.length}`;
+
+                  const parts = [];
+                  if (q.type) parts.push(String(q.type));
+                  if (q.difficulty) parts.push(String(q.difficulty));
+                  elQMetaText.textContent = parts.length ? parts.join(' • ') : '—';
+
+                  const wrapper = document.createElement('div');
+                  wrapper.className = 'q-card';
+
+                  const promptEl = document.createElement('div');
+                  promptEl.className = 'q-prompt mb-2';
+                  promptEl.textContent = prompt || '—';
+                  wrapper.appendChild(promptEl);
+
+                  const opts = Array.isArray(q.options) ? q.options.slice().sort(function (a, b) {
+                    const ax = parseInt(a.order_index, 10) || 0;
+                    const bx = parseInt(b.order_index, 10) || 0;
+                    return ax - bx;
+                  }) : [];
+
+                  if (String(q.type).toUpperCase() === 'ESSAY') {
+                    const textarea = document.createElement('textarea');
+                    textarea.className = 'form-control mt-3';
+                    textarea.rows = 6;
+                    textarea.placeholder = '{{ __('Type your answer here...') }}';
+                    textarea.value = q.saved_answer || '';
+
+                    textarea.addEventListener('input', function () {
+                      q.saved_answer = textarea.value;
+                    });
+
+                    wrapper.appendChild(textarea);
+                  } else if (String(q.type).toUpperCase() === 'FILL_BLANK') {
+                    const inputGroup = document.createElement('div');
+                    inputGroup.className = 'mt-3';
+
+                    const label = document.createElement('label');
+                    label.className = 'form-label text-muted small';
+                    label.textContent = '{{ __('Your Answer') }}';
+                    inputGroup.appendChild(label);
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'form-control';
+                    input.placeholder = '{{ __('enter your answer') }}';
+                    input.value = q.saved_answer || '';
+
+                    input.addEventListener('input', function () {
+                      q.saved_answer = input.value;
+                    });
+
+                    inputGroup.appendChild(input);
+                    wrapper.appendChild(inputGroup);
+                  } else if (String(q.type).toUpperCase() === 'REORDER') {
+                    // Reorder Interface
+                    const list = document.createElement('div');
+                    list.className = 'd-grid gap-2 mt-3';
+
+                    const currentOrder = (Array.isArray(q.saved_answer) && q.saved_answer.length === opts.length)
+                      ? q.saved_answer
+                      : opts.map(function(o) { return String(o.id); });
+
+                    // Map options by ID for easy finding
+                    const optsById = {};
+                    opts.forEach(function(o) { optsById[String(o.id)] = o; });
+
+                    // Populate list in current order
+                    currentOrder.forEach(function(optId, idx) {
+                      const opt = optsById[String(optId)];
+                      if(!opt) return;
+
+                      const row = document.createElement('div');
+                      row.className = 'opt-item d-flex gap-2 align-items-center justify-content-between p-2';
+
+                      // Text
+                      const txt = document.createElement('div');
+                      txt.textContent = getOptionText(opt);
+                      row.appendChild(txt);
+
+                      // Controls
+                      const ctrls = document.createElement('div');
+                      ctrls.className = 'd-flex flex-column gap-1';
+
+                      const btnUp = document.createElement('button');
+                      btnUp.type = 'button';
+                      btnUp.className = 'btn btn-sm btn-light py-0 px-1 border';
+                      btnUp.textContent = '▲';
+                      btnUp.disabled = idx === 0;
+                      btnUp.onclick = function(e) { e.stopPropagation(); moveItem(idx, -1); };
+
+                      const btnDown = document.createElement('button');
+                      btnDown.type = 'button';
+                      btnDown.className = 'btn btn-sm btn-light py-0 px-1 border';
+                      btnDown.textContent = '▼';
+                      btnDown.disabled = idx === (currentOrder.length - 1);
+                      btnDown.onclick = function(e) { e.stopPropagation(); moveItem(idx, 1); };
+
+                      ctrls.appendChild(btnUp);
+                      ctrls.appendChild(btnDown);
+                      row.appendChild(ctrls);
+
+                      list.appendChild(row);
+                    });
+
+                    wrapper.appendChild(list);
+
+                    // Helper to move items
+                    function moveItem(fromIdx, dir) {
+                      const toIdx = fromIdx + dir;
+                      if(toIdx < 0 || toIdx >= currentOrder.length) return;
+
+                      // Swap
+                      const temp = currentOrder[fromIdx];
+                      currentOrder[fromIdx] = currentOrder[toIdx];
+                      currentOrder[toIdx] = temp;
+
+                      // Save and re-render
+                      q.saved_answer = currentOrder;
+                      renderViewer(); // easiest way to update UI
+                    }
+
+                    // Initial save if null (sets default order as answer)
+                    if(!q.saved_answer) {
+                       q.saved_answer = currentOrder;
+                    }
+
+                  } else if (!opts.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'text-muted';
+                    empty.textContent = '{{ __('No options found for this question.') }}';
+                    wrapper.appendChild(empty);
+                  } else {
+                    const list = document.createElement('div');
+                    list.className = 'd-grid gap-2 mt-3';
+
+                    const selected = q.saved_answer;
+
+                    opts.forEach(function (opt, j) {
+                      const optRow = document.createElement('label');
+                      optRow.className = 'opt-item d-flex gap-2 align-items-start';
+
+                      const input = document.createElement('input');
+                      input.className = 'form-check-input opt-radio mt-1';
+                      input.type = 'radio';
+                      input.name = 'q_' + String(q.id ?? activeIndex);
+                      input.value = String(opt.id ?? j);
+
+                      let isSelected = false;
+                      if (selected !== null && typeof selected !== 'undefined') {
+                        isSelected = String(selected) === String(opt.id);
+                      }
+
+                      if (isSelected) {
+                        input.checked = true;
+                        optRow.classList.add('is-selected');
+                      }
+
+                      const txt = document.createElement('div');
+                      txt.className = 'flex-grow-1';
+                      txt.textContent = getOptionText(opt);
+
+                      optRow.appendChild(input);
+                      optRow.appendChild(txt);
+
+                      optRow.addEventListener('change', function () {
+                        q.saved_answer = String(opt.id ?? j);
+                        renderNav(); // Update visual state locally
+                        // Remove 'is-selected' from others
+                        const siblings = list.querySelectorAll('.opt-item');
+                        siblings.forEach(el => el.classList.remove('is-selected'));
+                        optRow.classList.add('is-selected');
+                      });
+
+                      list.appendChild(optRow);
+                    });
+
+                    wrapper.appendChild(list);
+                  }
+
+                  elQViewer.innerHTML = '';
+                  elQViewer.appendChild(wrapper);
+
+                  btnPrevQ.disabled = activeIndex <= 0;
+                  // btnNextQ is now just navigation, user might want to use "Answer" button to proceed
+                  btnNextQ.disabled = activeIndex >= (questions.length - 1);
+
+                  // Update Answer/Finish button state and text
+                  if (activeIndex === (questions.length - 1)) {
+                    btnAnswer.textContent = '{{ __('Finish Exam') }}';
+                    btnAnswer.classList.remove('btn-primary');
+                    btnAnswer.classList.add('btn-success');
+                  } else {
+                    btnAnswer.textContent = '{{ __('Answer') }}';
+                    btnAnswer.classList.remove('btn-success');
+                    btnAnswer.classList.add('btn-primary');
+                  }
+                }
+
+                function setActiveIndex(idx) {
+                  const next = Math.max(0, Math.min(idx, questions.length - 1));
+                  activeIndex = next;
+                  renderNav();
+                  renderViewer();
+                  try {
+                    const pills = elQNavList.querySelectorAll('.q-pill');
+                    if (pills && pills[activeIndex]) {
+                      pills[activeIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                    }
+                  } catch (e) { }
+                }
+
+                function goPrev() { setActiveIndex(activeIndex - 1); }
+                function goNext() { setActiveIndex(activeIndex + 1); }
+
+                async function onAnswerClick() {
+                  if (isSaving) return;
+                  const q = questions[activeIndex];
+                  if (!q) return;
+
+                  // If it's the last question, we just confirm finish?
+                  // The user said "Click to answer, and if last question, finish exam"
+                  // So we should save the answer first if selected.
+
+                  if (activeIndex === (questions.length - 1)) {
+                    // Last question
+                    if (q.saved_answer) {
+                      await saveAnswer(q);
+                    }
+                    if (confirm('{{ __('Are you sure you want to finish the exam?') }}')) {
+                      submitExam();
+                    }
+                    return;
+                  }
+
+                  // Normal question: Save and Next
+                  if (!q.saved_answer) {
+                    // If no answer selected, just go next? Or block?
+                    // Usually allow skip. passing to next.
+                    goNext();
+                  } else {
+                    await saveAnswer(q);
+                    goNext();
+                  }
+                }
+
+                async function saveAnswer(q) {
+                  if (!saveUrl) return;
+                  isSaving = true;
+                  btnAnswer.disabled = true;
+
+                  try {
+                    const res = await fetch(saveUrl, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                        'X-ATTEMPT-SESSION': attemptSession
+                      },
+                      body: JSON.stringify({
+                        question_id: q.id,
+                        response: (String(q.type).toUpperCase() === 'REORDER')
+                          ? { order: q.saved_answer }
+                          : { value: q.saved_answer }
+                      })
+                    });
+
+                    if (!res.ok) {
+                      console.error('Failed to save');
+                      // Optional: show toast
+                    }
+                  } catch (e) {
+                    console.error(e);
+                  } finally {
+                    isSaving = false;
+                    btnAnswer.disabled = false;
+                  }
+                }
+
+                async function submitExam() {
+                  if (!submitUrl) return;
+                  isSaving = true;
+                  btnAnswer.disabled = true;
+                  btnAnswer.textContent = '{{ __('Submitting...') }}';
+
+                  try {
+                    const res = await fetch(submitUrl, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                        'X-ATTEMPT-SESSION': attemptSession
+                      }
+                    });
+
+                    if (res.ok) {
+                      window.location.href = "{{ route('student.exams.index') }}";
+                    } else {
+                      alert('{{ __('Failed to submit exam. Please try again.') }}');
+                      btnAnswer.disabled = false;
+                      btnAnswer.textContent = '{{ __('Finish Exam') }}';
+                    }
+                  } catch (e) {
+                    console.error(e);
+                    alert('{{ __('Error submitting exam.') }}');
+                    btnAnswer.disabled = false;
+                  } finally {
+                    isSaving = false;
+                  }
+                }
+
+                btnPrevQ.addEventListener('click', goPrev);
+                btnNextQ.addEventListener('click', goNext);
+                btnAnswer.addEventListener('click', onAnswerClick);
+
+                document.addEventListener('keydown', function (e) {
+                  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+                  if (!isRtl) {
+                    if (e.key === 'ArrowLeft') goPrev();
+                    if (e.key === 'ArrowRight') goNext();
+                  } else {
+                    if (e.key === 'ArrowRight') goPrev();
+                    if (e.key === 'ArrowLeft') goNext();
+                  }
                 });
 
-                list.appendChild(optRow);
-              });
-
-              wrapper.appendChild(list);
-            }
-
-            elQViewer.innerHTML = '';
-            elQViewer.appendChild(wrapper);
-
-            btnPrevQ.disabled = activeIndex <= 0;
-            // btnNextQ is now just navigation, user might want to use "Answer" button to proceed
-            btnNextQ.disabled = activeIndex >= (questions.length - 1);
-
-            // Update Answer/Finish button state and text
-            if (activeIndex === (questions.length - 1)) {
-              btnAnswer.textContent = '{{ __('Finish Exam') }}';
-              btnAnswer.classList.remove('btn-primary');
-              btnAnswer.classList.add('btn-success');
-            } else {
-              btnAnswer.textContent = '{{ __('Answer') }}';
-              btnAnswer.classList.remove('btn-success');
-              btnAnswer.classList.add('btn-primary');
-            }
-          }
-
-          function setActiveIndex(idx) {
-            const next = Math.max(0, Math.min(idx, questions.length - 1));
-            activeIndex = next;
-            renderNav();
-            renderViewer();
-            try {
-              const pills = elQNavList.querySelectorAll('.q-pill');
-              if (pills && pills[activeIndex]) {
-                pills[activeIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
-              }
-            } catch (e) { }
-          }
-
-          function goPrev() { setActiveIndex(activeIndex - 1); }
-          function goNext() { setActiveIndex(activeIndex + 1); }
-
-          async function onAnswerClick() {
-            if (isSaving) return;
-            const q = questions[activeIndex];
-            if (!q) return;
-
-            // If it's the last question, we just confirm finish? 
-            // The user said "Click to answer, and if last question, finish exam"
-            // So we should save the answer first if selected.
-
-            if (activeIndex === (questions.length - 1)) {
-              // Last question
-              if (q.saved_answer) {
-                await saveAnswer(q);
-              }
-              if (confirm('{{ __('Are you sure you want to finish the exam?') }}')) {
-                submitExam();
-              }
-              return;
-            }
-
-            // Normal question: Save and Next
-            if (!q.saved_answer) {
-              // If no answer selected, just go next? Or block?
-              // Usually allow skip. passing to next.
-              goNext();
-            } else {
-              await saveAnswer(q);
-              goNext();
-            }
-          }
-
-          async function saveAnswer(q) {
-            if (!saveUrl) return;
-            isSaving = true;
-            btnAnswer.disabled = true;
-
-            try {
-              const res = await fetch(saveUrl, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
-                  'X-ATTEMPT-SESSION': attemptSession
-                },
-                body: JSON.stringify({
-                  question_id: q.id,
-                  response: { value: q.saved_answer }
-                })
-              });
-
-              if (!res.ok) {
-                console.error('Failed to save');
-                // Optional: show toast
-              }
-            } catch (e) {
-              console.error(e);
-            } finally {
-              isSaving = false;
-              btnAnswer.disabled = false;
-            }
-          }
-
-          async function submitExam() {
-            if (!submitUrl) return;
-            isSaving = true;
-            btnAnswer.disabled = true;
-            btnAnswer.textContent = '{{ __('Submitting...') }}';
-
-            try {
-              const res = await fetch(submitUrl, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
-                  'X-ATTEMPT-SESSION': attemptSession
+                function renderError(msg) {
+                  elQNavList.innerHTML = '';
+                  elQViewer.innerHTML = '';
+                  elQCountText.textContent = '—';
+                  const card = document.createElement('div');
+                  card.className = 'alert alert-danger';
+                  card.textContent = msg;
+                  elQViewer.appendChild(card);
                 }
-              });
 
-              if (res.ok) {
-                window.location.href = "{{ route('student.exams.index') }}";
-              } else {
-                alert('{{ __('Failed to submit exam. Please try again.') }}');
-                btnAnswer.disabled = false;
-                btnAnswer.textContent = '{{ __('Finish Exam') }}';
-              }
-            } catch (e) {
-              console.error(e);
-              alert('{{ __('Error submitting exam.') }}');
-              btnAnswer.disabled = false;
-            } finally {
-              isSaving = false;
-            }
-          }
+                async function loadQuestions() {
+                  if (!questionsEndpoint) { renderError('{{ __('Questions endpoint is missing.') }}'); return; }
 
-          btnPrevQ.addEventListener('click', goPrev);
-          btnNextQ.addEventListener('click', goNext);
-          btnAnswer.addEventListener('click', onAnswerClick);
+                  try {
+                    const res = await fetch(questionsEndpoint, {
+                      method: 'GET',
+                      credentials: 'same-origin',
+                      headers: { 'Accept': 'application/json' }
+                    });
 
-          document.addEventListener('keydown', function (e) {
-            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+                    if (!res.ok) {
+                      renderError('{{ __('Failed to load questions.') }}' + ' (' + res.status + ')');
+                      return;
+                    }
 
-            if (!isRtl) {
-              if (e.key === 'ArrowLeft') goPrev();
-              if (e.key === 'ArrowRight') goNext();
-            } else {
-              if (e.key === 'ArrowRight') goPrev();
-              if (e.key === 'ArrowLeft') goNext();
-            }
-          });
+                    const payload = await res.json();
+                    questions = normalizeQuestions(payload);
 
-          function renderError(msg) {
-            elQNavList.innerHTML = '';
-            elQViewer.innerHTML = '';
-            elQCountText.textContent = '—';
-            const card = document.createElement('div');
-            card.className = 'alert alert-danger';
-            card.textContent = msg;
-            elQViewer.appendChild(card);
-          }
+                    if (!questions.length) {
+                      renderError('{{ __('No questions available for this exam.') }}');
+                      return;
+                    }
 
-          async function loadQuestions() {
-            if (!questionsEndpoint) { renderError('{{ __('Questions endpoint is missing.') }}'); return; }
+                    activeIndex = 0;
+                    renderNav();
+                    renderViewer();
+                  } catch (e) {
+                    renderError('{{ __('Failed to load questions. Please refresh the page.') }}');
+                  }
+                }
 
-            try {
-              const res = await fetch(questionsEndpoint, {
-                method: 'GET',
-                credentials: 'same-origin',
-                headers: { 'Accept': 'application/json' }
-              });
+                if (remaining !== null && typeof remaining !== 'undefined') {
+                  elTimerText.textContent = formatTime(remaining);
+                  setInterval(tickTimer, 1000);
+                } else {
+                  elTimerText.textContent = '—';
+                }
 
-              if (!res.ok) {
-                renderError('{{ __('Failed to load questions.') }}' + ' (' + res.status + ')');
-                return;
-              }
-
-              const payload = await res.json();
-              questions = normalizeQuestions(payload);
-
-              if (!questions.length) {
-                renderError('{{ __('No questions available for this exam.') }}');
-                return;
-              }
-
-              activeIndex = 0;
-              renderNav();
-              renderViewer();
-            } catch (e) {
-              renderError('{{ __('Failed to load questions. Please refresh the page.') }}');
-            }
-          }
-
-          if (remaining !== null && typeof remaining !== 'undefined') {
-            elTimerText.textContent = formatTime(remaining);
-            setInterval(tickTimer, 1000);
-          } else {
-            elTimerText.textContent = '—';
-          }
-
-          loadQuestions();
-        })();
-      </script>
+                loadQuestions();
+              })();
+            </script>
     @endpush
 
   @else
-    {{-- =========================
-    EXAM DETAILS VIEW
-    ========================= --}}
-    <div class="card student-card mb-4">
-      <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div>
-          <div class="stu-page-title h3 mb-1">{{ $title }}</div>
-          <div class="stu-subtitle">{{ __('No grades are shown to students.') }}</div>
-        </div>
-
-        <div class="d-flex flex-wrap gap-2">
-          <a href="{{ route('student.exams.index') }}" class="btn btn-outline-secondary">
-            {{ __('Back to Exams') }}
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="card student-card mb-3">
-      <div class="card-body">
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-          @if($duration)
-            <span class="badge badge-soft-primary">⏱ {{ $duration }} {{ __('min') }}</span>
-          @endif
-          @if(!is_null($attemptsLimit))
-            <span class="badge badge-soft-secondary">🎯 {{ __('Attempts') }}: {{ $attemptsLimit }}</span>
-          @endif
-          @if(!is_null($attemptsRemaining))
-            <span class="badge badge-soft-success">✅ {{ __('Remaining') }}: {{ $attemptsRemaining }}</span>
-          @endif
-          <span class="badge badge-soft-primary">🔒 {{ __('Correct answers are hidden') }}</span>
-        </div>
-
-        <div class="mt-2 text-muted">
-          {{ __('Start from the instructions page. If you have an active attempt, you can continue it.') }}
-        </div>
-      </div>
-    </div>
-
-    <div class="row g-3">
-      <div class="col-12 col-lg-8">
-        <div class="card student-card">
-          <div class="card-body">
-            <div class="h5 fw-bold mb-2">{{ __('Overview') }}</div>
-
-            <div class="sp-card-title mb-2">{{ __('Instructions') }}</div>
-
-            <ul class="instruction-list mb-0" style="padding-inline-start: 1.2rem;">
-              <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
-                {{ __('Do not refresh the page during the exam.') }}
-              </li>
-              <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
-                {{ __('Your answers are saved automatically.') }}
-              </li>
-              <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
-                {{ __('If time ends, your attempt will be submitted automatically.') }}
-              </li>
-              <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
-                {{ __('Grades and correct answers are not shown to students.') }}
-              </li>
-            </ul>
-
-            <hr class="soft-divider my-3" style="border-top: 1px dashed rgba(15,23,42,.14);">
-
-            <div class="d-flex flex-wrap gap-2 align-items-center">
-              @if($roomUrl)
-                <a href="{{ $roomUrl }}" class="btn btn-primary btn-wide" style="min-width: 190px;">
-                  {{ __('Continue Exam') }}
-                </a>
-              @else
-                <form method="POST" action="{{ $startUrl }}" class="m-0">
-                  @csrf
-                  <button type="submit" class="btn btn-primary btn-wide" style="min-width: 190px;" @if(!$canStart) disabled
-                  @endif>
-                    {{ __('Start Exam') }}
-                  </button>
-                </form>
-              @endif
-
-              @if(!$roomUrl && !$canStart)
-                <div class="d-inline-block text-danger small ms-2">
-                  {{ __('Max attempts reached') }}
-                </div>
-              @endif
-            </div>
-
-            <div class="text-muted small mt-3">
-              {{ __('No grades will be shown after submission.') }}
-            </div>
+      {{-- =========================
+      EXAM DETAILS VIEW
+      ========================= --}}
+      <div class="card student-card mb-4">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div>
+            <div class="stu-page-title h3 mb-1">{{ $title }}</div>
+            <div class="stu-subtitle">{{ __('No grades are shown to students.') }}</div>
           </div>
-        </div>
 
-        <div class="card student-card mt-3">
-          <div class="card-body">
-            <div class="h5 fw-bold mb-2">{{ __('Good to know') }}</div>
-            <div class="text-muted">
-              {{ __('During the exam, avoid refreshing the page or closing the tab. If time ends, your attempt may be submitted automatically.') }}
-            </div>
-
-            <div class="mt-3 d-flex flex-wrap gap-2">
-              <span class="badge badge-soft-secondary">⚡ {{ __('Auto-save') }}</span>
-              <span class="badge badge-soft-secondary">🧠 {{ __('Focus') }}</span>
-              <span class="badge badge-soft-secondary">🧭 {{ __('Navigate by question numbers') }}</span>
-            </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{{ route('student.exams.index') }}" class="btn btn-outline-secondary">
+              {{ __('Back to Exams') }}
+            </a>
           </div>
         </div>
       </div>
 
-      <div class="col-12 col-lg-4">
-        <div class="card student-card">
-          <div class="card-body">
-            <div class="h5 fw-bold mb-2">{{ __('Exam Info') }}</div>
-            <ul class="list-unstyled mb-0 small text-muted">
-              <li class="mb-2">🆔 <span class="text-dark">{{ $examId ?? '—' }}</span></li>
-              <li class="mb-2">⏱ <span class="text-dark">{{ $duration ? $duration . ' ' . __('min') : '—' }}</span></li>
-              <li class="mb-2">🎯 <span class="text-dark">{{ $attemptsLimit ?? '—' }}</span></li>
-              <li class="mb-2">🔒 <span class="text-dark">{{ __('Hidden answers') }}</span></li>
-            </ul>
+      <div class="card student-card mb-3">
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            @if($duration)
+              <span class="badge badge-soft-primary">⏱ {{ $duration }} {{ __('min') }}</span>
+            @endif
+            @if(!is_null($attemptsLimit))
+              <span class="badge badge-soft-secondary">🎯 {{ __('Attempts') }}: {{ $attemptsLimit }}</span>
+            @endif
+            @if(!is_null($attemptsRemaining))
+              <span class="badge badge-soft-success">✅ {{ __('Remaining') }}: {{ $attemptsRemaining }}</span>
+            @endif
+            <span class="badge badge-soft-primary">🔒 {{ __('Correct answers are hidden') }}</span>
+          </div>
+
+          <div class="mt-2 text-muted">
+            {{ __('Start from the instructions page. If you have an active attempt, you can continue it.') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12 col-lg-8">
+          <div class="card student-card">
+            <div class="card-body">
+              <div class="h5 fw-bold mb-2">{{ __('Overview') }}</div>
+
+              <div class="sp-card-title mb-2">{{ __('Instructions') }}</div>
+
+              <ul class="instruction-list mb-0" style="padding-inline-start: 1.2rem;">
+                <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
+                  {{ __('Do not refresh the page during the exam.') }}
+                </li>
+                <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
+                  {{ __('Your answers are saved automatically.') }}
+                </li>
+                <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
+                  {{ __('If time ends, your attempt will be submitted automatically.') }}
+                </li>
+                <li style="margin-bottom: .5rem; color: rgba(15,23,42,.82);">
+                  {{ __('Grades and correct answers are not shown to students.') }}
+                </li>
+              </ul>
+
+              <hr class="soft-divider my-3" style="border-top: 1px dashed rgba(15,23,42,.14);">
+
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                @if($roomUrl)
+                  <a href="{{ $roomUrl }}" class="btn btn-primary btn-wide" style="min-width: 190px;">
+                    {{ __('Continue Exam') }}
+                  </a>
+                @else
+                  <form method="POST" action="{{ $startUrl }}" class="m-0">
+                    @csrf
+                    <button type="submit" class="btn btn-primary btn-wide" style="min-width: 190px;" @if(!$canStart) disabled
+                    @endif>
+                      {{ __('Start Exam') }}
+                    </button>
+                  </form>
+                @endif
+
+                @if(!$roomUrl && !$canStart)
+                  <div class="d-inline-block text-danger small ms-2">
+                    {{ __('Max attempts reached') }}
+                  </div>
+                @endif
+              </div>
+
+              <div class="text-muted small mt-3">
+                {{ __('No grades will be shown after submission.') }}
+              </div>
+            </div>
+          </div>
+
+          <div class="card student-card mt-3">
+            <div class="card-body">
+              <div class="h5 fw-bold mb-2">{{ __('Good to know') }}</div>
+              <div class="text-muted">
+                {{ __('During the exam, avoid refreshing the page or closing the tab. If time ends, your attempt may be submitted automatically.') }}
+              </div>
+
+              <div class="mt-3 d-flex flex-wrap gap-2">
+                <span class="badge badge-soft-secondary">⚡ {{ __('Auto-save') }}</span>
+                <span class="badge badge-soft-secondary">🧠 {{ __('Focus') }}</span>
+                <span class="badge badge-soft-secondary">🧭 {{ __('Navigate by question numbers') }}</span>
+              </div>
+            </div>
           </div>
         </div>
 
+        <div class="col-12 col-lg-4">
+          <div class="card student-card">
+            <div class="card-body">
+              <div class="h5 fw-bold mb-2">{{ __('Exam Info') }}</div>
+              <ul class="list-unstyled mb-0 small text-muted">
+                <li class="mb-2">🆔 <span class="text-dark">{{ $examId ?? '—' }}</span></li>
+                <li class="mb-2">⏱ <span class="text-dark">{{ $duration ? $duration . ' ' . __('min') : '—' }}</span></li>
+                <li class="mb-2">🎯 <span class="text-dark">{{ $attemptsLimit ?? '—' }}</span></li>
+                <li class="mb-2">🔒 <span class="text-dark">{{ __('Hidden answers') }}</span></li>
+              </ul>
+            </div>
+          </div>
 
+
+        </div>
       </div>
-    </div>
-  @endif
+    @endif
 @endsection
