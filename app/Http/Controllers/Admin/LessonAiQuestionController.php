@@ -8,19 +8,23 @@ use App\Models\Question;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use App\Services\LessonAiContextBuilder;
+use App\Services\OpenAiQuestionGenerator;
 
 class LessonAiQuestionController extends Controller
 {
     public function create(Lesson $lesson)
     {
-        $lesson->load(['learningOutcomes' => function ($q) {
-            $q->select('learning_outcomes.id', 'title_ar', 'title_en');
-        }]);
+        $lesson->load([
+            'learningOutcomes' => function ($q) {
+                $q->select('learning_outcomes.id', 'title_ar', 'title_en');
+            }
+        ]);
 
         return view('admin.lessons.ai.questions.create', compact('lesson'));
     }
 
-    public function generate(Request $request, Lesson $lesson)
+    public function generate(Request $request, Lesson $lesson, LessonAiContextBuilder $contextBuilder, OpenAiQuestionGenerator $aiGenerator)
     {
         /**
          * ✅ FINAL FIX (field name + value compatibility)
@@ -40,16 +44,16 @@ class LessonAiQuestionController extends Controller
 
         $data = $request->validate([
             // Accept both AR/EN/BOTH and ar/en/both
-            'language_mode'     => 'required|in:AR,EN,BOTH,ar,en,both',
+            'language_mode' => 'required|in:AR,EN,BOTH,ar,en,both',
 
-            'types'             => 'required|array|min:1',
-            'types.*'           => 'in:MCQ,TF,ESSAY,CLASSIFICATION,REORDER,FILL_BLANK',
-            'count'             => 'required|integer|min:1|max:50',
+            'types' => 'required|array|min:1',
+            'types.*' => 'in:MCQ,TF,ESSAY,CLASSIFICATION,REORDER,FILL_BLANK',
+            'count' => 'required|integer|min:1|max:50',
 
             // distribution inputs موجودة في create.blade.php
-            'difficulty_easy'   => 'required|integer|min:0|max:100',
+            'difficulty_easy' => 'required|integer|min:0|max:100',
             'difficulty_medium' => 'required|integer|min:0|max:100',
-            'difficulty_hard'   => 'required|integer|min:0|max:100',
+            'difficulty_hard' => 'required|integer|min:0|max:100',
         ]);
 
         // ✅ Normalize language mode to: ar|en|both
@@ -59,7 +63,7 @@ class LessonAiQuestionController extends Controller
         $count = (int) $data['count'];
 
         $easy = (int) $data['difficulty_easy'];
-        $med  = (int) $data['difficulty_medium'];
+        $med = (int) $data['difficulty_medium'];
         $hard = (int) $data['difficulty_hard'];
 
         if (($easy + $med + $hard) !== 100) {
@@ -68,15 +72,35 @@ class LessonAiQuestionController extends Controller
                 ->withErrors(['difficulty_easy' => 'Difficulty distribution must sum to 100%.']);
         }
 
-        // ✅ Stub draft (replace later with real AI)
-        $draftQuestions = $this->stubDraft($types, $count, $langMode, [
-            'easy' => $easy,
-            'medium' => $med,
-            'hard' => $hard,
-        ]);
+        // ✅ Build Context
+        $context = $contextBuilder->build($lesson, $langMode);
+
+        try {
+            // ✅ Try AI Generation
+            $draftQuestions = $aiGenerator->generate($context, [
+                'count' => $count,
+                'types' => $types,
+                'difficulties' => [
+                    'easy' => $easy,
+                    'medium' => $med,
+                    'hard' => $hard,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            // ✅ If AI fails, return error to user instead of silent stub fallback
+            // This ensures they know WHY it failed (e.g. missing key)
+            return back()
+                ->withInput()
+                ->withErrors(['ai_error' => 'AI Generation Failed: ' . $e->getMessage()]);
+        }
+
+        // If empty for some other reason
+        if (empty($draftQuestions)) {
+            return back()->withInput()->withErrors(['ai_error' => 'AI returned no questions.']);
+        }
 
         // ✅ Normalize by language mode + per-type schema
-        $draftQuestions = array_map(fn ($q) => $this->normalizeDraftQuestion($q, $langMode), $draftQuestions);
+        $draftQuestions = array_map(fn($q) => $this->normalizeDraftQuestion($q, $langMode), $draftQuestions);
 
         session()->put($this->draftSessionKey($lesson->id), [
             'lang_mode' => $langMode,
@@ -213,8 +237,8 @@ class LessonAiQuestionController extends Controller
         $mode = strtolower(trim($mode));
 
         return match ($mode) {
-            'ar'   => 'ar',
-            'en'   => 'en',
+            'ar' => 'ar',
+            'en' => 'en',
             'both' => 'both',
             default => 'ar',
         };
@@ -267,8 +291,10 @@ class LessonAiQuestionController extends Controller
                 $opt['text_en'] = Arr::get($opt, 'text_en');
                 $opt['is_correct'] = (bool) Arr::get($opt, 'is_correct', false);
 
-                if ($langMode === 'ar') $opt['text_en'] = null;
-                if ($langMode === 'en') $opt['text_ar'] = null;
+                if ($langMode === 'ar')
+                    $opt['text_en'] = null;
+                if ($langMode === 'en')
+                    $opt['text_ar'] = null;
 
                 return $opt;
             }, $options));
@@ -279,14 +305,23 @@ class LessonAiQuestionController extends Controller
                     ['text_ar' => 'اختيار 1', 'text_en' => ($langMode === 'both' || $langMode === 'en') ? 'Option 1' : null, 'is_correct' => true],
                     ['text_ar' => 'اختيار 2', 'text_en' => ($langMode === 'both' || $langMode === 'en') ? 'Option 2' : null, 'is_correct' => false],
                 ];
-                if ($langMode === 'ar') { $options[0]['text_en'] = null; $options[1]['text_en'] = null; }
-                if ($langMode === 'en') { $options[0]['text_ar'] = null; $options[1]['text_ar'] = null; }
+                if ($langMode === 'ar') {
+                    $options[0]['text_en'] = null;
+                    $options[1]['text_en'] = null;
+                }
+                if ($langMode === 'en') {
+                    $options[0]['text_ar'] = null;
+                    $options[1]['text_ar'] = null;
+                }
             }
 
             // ensure exactly 1 correct (if none selected -> first)
             $hasCorrect = false;
             foreach ($options as $opt) {
-                if (!empty($opt['is_correct'])) { $hasCorrect = true; break; }
+                if (!empty($opt['is_correct'])) {
+                    $hasCorrect = true;
+                    break;
+                }
             }
             if (!$hasCorrect && isset($options[0])) {
                 $options[0]['is_correct'] = true;
@@ -303,12 +338,15 @@ class LessonAiQuestionController extends Controller
             // detect correct (default true)
             $correctIndex = 0;
             foreach ($opts as $i => $o) {
-                if (!empty($o['is_correct'])) { $correctIndex = $i; break; }
+                if (!empty($o['is_correct'])) {
+                    $correctIndex = $i;
+                    break;
+                }
             }
 
-            $trueAr  = 'صحيح';
+            $trueAr = 'صحيح';
             $falseAr = 'خطأ';
-            $trueEn  = 'True';
+            $trueEn = 'True';
             $falseEn = 'False';
 
             $options = [
@@ -340,8 +378,10 @@ class LessonAiQuestionController extends Controller
                 $it = is_array($it) ? $it : [];
                 $it['text_ar'] = Arr::get($it, 'text_ar');
                 $it['text_en'] = Arr::get($it, 'text_en');
-                if ($langMode === 'ar') $it['text_en'] = null;
-                if ($langMode === 'en') $it['text_ar'] = null;
+                if ($langMode === 'ar')
+                    $it['text_en'] = null;
+                if ($langMode === 'en')
+                    $it['text_ar'] = null;
                 return $it;
             }, $items));
             $q['reorder_items'] = $items;
@@ -360,8 +400,10 @@ class LessonAiQuestionController extends Controller
                 $cat['label_ar'] = Arr::get($cat, 'label_ar', $idx === 0 ? 'التصنيف (أ)' : 'التصنيف (ب)');
                 $cat['label_en'] = Arr::get($cat, 'label_en', $idx === 0 ? 'Category A' : 'Category B');
 
-                if ($langMode === 'ar') $cat['label_en'] = null;
-                if ($langMode === 'en') $cat['label_ar'] = null;
+                if ($langMode === 'ar')
+                    $cat['label_en'] = null;
+                if ($langMode === 'en')
+                    $cat['label_ar'] = null;
 
                 return $cat;
             }, $categories, array_keys($categories)));
@@ -371,8 +413,14 @@ class LessonAiQuestionController extends Controller
                     ['id' => 'A', 'label_ar' => 'التصنيف (أ)', 'label_en' => 'Category A'],
                     ['id' => 'B', 'label_ar' => 'التصنيف (ب)', 'label_en' => 'Category B'],
                 ];
-                if ($langMode === 'ar') { $categories[0]['label_en'] = null; $categories[1]['label_en'] = null; }
-                if ($langMode === 'en') { $categories[0]['label_ar'] = null; $categories[1]['label_ar'] = null; }
+                if ($langMode === 'ar') {
+                    $categories[0]['label_en'] = null;
+                    $categories[1]['label_en'] = null;
+                }
+                if ($langMode === 'en') {
+                    $categories[0]['label_ar'] = null;
+                    $categories[1]['label_ar'] = null;
+                }
             }
 
             $items = Arr::get($cls, 'items', []);
@@ -382,10 +430,13 @@ class LessonAiQuestionController extends Controller
                 $it['text_ar'] = Arr::get($it, 'text_ar');
                 $it['text_en'] = Arr::get($it, 'text_en');
                 $it['correct_category'] = Arr::get($it, 'correct_category', 'A');
-                if (!in_array($it['correct_category'], ['A', 'B'], true)) $it['correct_category'] = 'A';
+                if (!in_array($it['correct_category'], ['A', 'B'], true))
+                    $it['correct_category'] = 'A';
 
-                if ($langMode === 'ar') $it['text_en'] = null;
-                if ($langMode === 'en') $it['text_ar'] = null;
+                if ($langMode === 'ar')
+                    $it['text_en'] = null;
+                if ($langMode === 'en')
+                    $it['text_ar'] = null;
 
                 return $it;
             }, $items));
@@ -407,18 +458,22 @@ class LessonAiQuestionController extends Controller
     private function stubDraft(array $types, int $count, string $langMode, array $dist): array
     {
         // ignore unsupported now (FILL_BLANK) in stub
-        $supported = array_values(array_filter($types, fn ($t) => in_array($t, ['MCQ', 'TF', 'ESSAY', 'CLASSIFICATION', 'REORDER'], true)));
-        if (count($supported) === 0) $supported = ['MCQ'];
+        $supported = array_values(array_filter($types, fn($t) => in_array($t, ['MCQ', 'TF', 'ESSAY', 'CLASSIFICATION', 'REORDER'], true)));
+        if (count($supported) === 0)
+            $supported = ['MCQ'];
 
         // build difficulty pool
         $pool = [];
         $easyN = (int) round($count * ($dist['easy'] / 100));
-        $medN  = (int) round($count * ($dist['medium'] / 100));
+        $medN = (int) round($count * ($dist['medium'] / 100));
         $hardN = max(0, $count - $easyN - $medN);
 
-        for ($i = 0; $i < $easyN; $i++) $pool[] = 'easy';
-        for ($i = 0; $i < $medN; $i++)  $pool[] = 'medium';
-        for ($i = 0; $i < $hardN; $i++) $pool[] = 'hard';
+        for ($i = 0; $i < $easyN; $i++)
+            $pool[] = 'easy';
+        for ($i = 0; $i < $medN; $i++)
+            $pool[] = 'medium';
+        for ($i = 0; $i < $hardN; $i++)
+            $pool[] = 'hard';
         shuffle($pool);
 
         $out = [];

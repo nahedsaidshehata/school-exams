@@ -80,18 +80,27 @@ class ExamController extends Controller
             ->pluck('exam_id')
             ->toArray();
 
+        // ✅ Get list of exam IDs that are currently IN_PROGRESS
+        $startedExamIds = \App\Models\ExamAttempt::where('student_id', $student->id)
+            ->where('status', 'IN_PROGRESS')
+            ->pluck('exam_id')
+            ->toArray();
+
         // Resolve state for each exam
-        $examsWithState = $exams->map(function ($exam) use ($student, $submittedExamIds) {
+        $examsWithState = $exams->map(function ($exam) use ($student, $submittedExamIds, $startedExamIds) {
             $exam->state = $this->stateResolver->resolveState($exam, $student);
             $exam->state_icon = $this->stateResolver->getStateIcon($exam->state);
             $exam->state_badge = $this->stateResolver->getStateBadgeClass($exam->state);
 
-            // Mark if submitted
+            // Mark if submitted or started
             $exam->is_submitted = in_array($exam->id, $submittedExamIds);
+            $exam->is_started = in_array($exam->id, $startedExamIds);
 
             // Determine status for UI
             if ($exam->is_submitted) {
                 $exam->status = 'submitted';
+            } elseif ($exam->is_started) {
+                $exam->status = 'in_progress';
             } elseif ($exam->state === 'EXPIRED') {
                 $exam->status = 'expired';
             } elseif ($exam->state === 'AVAILABLE') {
@@ -110,8 +119,8 @@ class ExamController extends Controller
             $status = request('status');
             $examsWithState = $examsWithState->filter(function ($exam) use ($status) {
                 if ($status === 'available') {
-                    // Available: New exams (not submitted) AND time is valid (AVAILABLE)
-                    return $exam->state === 'AVAILABLE' && !$exam->is_submitted;
+                    // Available: New exams (not submitted AND not started) AND time is valid (AVAILABLE)
+                    return $exam->state === 'AVAILABLE' && !$exam->is_submitted && !$exam->is_started;
                 }
                 if ($status === 'submitted') {
                     // Submitted: Finished at least once.
@@ -120,6 +129,9 @@ class ExamController extends Controller
                 if ($status === 'expired') {
                     // Expired: Time finished.
                     return $exam->state === 'EXPIRED';
+                }
+                if ($status === 'in_progress') {
+                    return $exam->is_started;
                 }
                 // For other statuses or 'all', return everything (or maybe filter 'upcoming'?)
                 // User only specified logic for these three.
