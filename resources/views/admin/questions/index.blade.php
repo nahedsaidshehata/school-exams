@@ -212,7 +212,7 @@
               <th class="text-nowrap">{{ __('Difficulty') }}</th>
               <th>{{ __('Prompt (EN)') }}</th>
               <th>{{ __('Lesson') }}</th>
-              <th class="text-nowrap">{{ __('Options') }}</th>
+{{--              <th class="text-nowrap">{{ __('Options') }}</th>--}}
               <th class="text-nowrap">{{ __('Created') }}</th>
               <th class="text-nowrap text-end">{{ __('Actions') }}</th>
             </tr>
@@ -240,10 +240,10 @@
                   {{ $question->lesson->title_en ?? $question->lesson->title_ar ?? 'N/A' }}
                 </td>
 
-                <td class="text-nowrap">
-                  {{-- Options count (will be 0 if none were stored in question_options) --}}
-                  <span class="badge text-bg-primary">{{ $question->options_count ?? 0 }}</span>
-                </td>
+{{--                <td class="text-nowrap">--}}
+{{--                  --}}{{-- Options count (will be 0 if none were stored in question_options) --}}
+{{--                  <span class="badge text-bg-primary">{{ $question->options_count ?? 0 }}</span>--}}
+{{--                </td>--}}
 
                 <td class="text-nowrap">
                   {{ optional($question->created_at)->format('Y-m-d') }}
@@ -344,11 +344,11 @@
         async function onFilterChange() {
           // For Section or Grade change, we mainly update Lessons.
           // Sections list depends only on Subject, so it doesn't change here.
-          
+
           // Clear lesson if Section changed? Not necessarily, but if the current lesson doesn't belong to new section, it will be cleared by setOptions check.
-          
+
           const data = await fetchFilters();
-          
+
           if (lessonSelect) {
              setOptions(lessonSelect, data.lessons, 'All', (l) => (l.title_en || l.title_ar || 'Lesson'));
           }

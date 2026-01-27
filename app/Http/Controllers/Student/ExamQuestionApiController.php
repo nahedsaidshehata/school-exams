@@ -49,6 +49,10 @@ class ExamQuestionApiController extends Controller
                 $data['options'] = [];
             }
 
+            if (isset($question->metadata['classification'])) {
+                $data['classification'] = $question->metadata['classification'];
+            }
+
             return $data;
         });
 

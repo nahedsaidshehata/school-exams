@@ -30,24 +30,34 @@
 
   @push('head')
     <style>
-      .kv p { margin: 0; }
-      .kv strong { display:inline-block; min-width: 140px; }
+      .kv p {
+        margin: 0;
+      }
+
+      .kv strong {
+        display: inline-block;
+        min-width: 140px;
+      }
+
       .box {
-        border: 1px solid rgba(0,0,0,.08);
+        border: 1px solid rgba(0, 0, 0, .08);
         border-radius: 14px;
         padding: 14px;
         background: #fff;
       }
+
       .opt {
-        border: 1px solid rgba(0,0,0,.08);
+        border: 1px solid rgba(0, 0, 0, .08);
         border-radius: 12px;
         padding: 12px;
         background: #fff;
       }
+
       .opt-correct {
-        border-color: rgba(25,135,84,.35);
-        background: rgba(25,135,84,.06);
+        border-color: rgba(25, 135, 84, .35);
+        background: rgba(25, 135, 84, .06);
       }
+
       .badge-pill {
         display: inline-flex;
         align-items: center;
@@ -55,11 +65,14 @@
         border-radius: 999px;
         font-size: .78rem;
         font-weight: 700;
-        border: 1px solid rgba(0,0,0,.08);
-        background: rgba(13,110,253,.08);
+        border: 1px solid rgba(0, 0, 0, .08);
+        background: rgba(13, 110, 253, .08);
         color: #0d6efd;
       }
-      .muted-dash { color:#adb5bd; }
+
+      .muted-dash {
+        color: #adb5bd;
+      }
     </style>
   @endpush
 
@@ -71,7 +84,8 @@
           <div class="kv">
             <p><strong>{{ __('Type') }}:</strong> <span class="badge-pill">{{ $question->type }}</span></p>
             <p><strong>{{ __('Difficulty') }}:</strong> <span class="badge-pill">{{ $question->difficulty }}</span></p>
-            <p><strong>{{ __('Lesson') }}:</strong> {{ $question->lesson->title_en ?? $question->lesson->title_ar ?? 'N/A' }}</p>
+            <p><strong>{{ __('Lesson') }}:</strong>
+              {{ $question->lesson->title_en ?? $question->lesson->title_ar ?? 'N/A' }}</p>
             <p class="text-muted small mt-2">
               {{ $question->lesson->section->material->name_en ?? $question->lesson->section->material->name_ar ?? '' }}
               @if($question->lesson?->section)
@@ -93,7 +107,7 @@
       </div>
 
       {{-- ✅ MCQ / TF --}}
-      @if(in_array($type, ['MCQ','TF']) && $question->options && $question->options->count())
+      @if(in_array($type, ['MCQ', 'TF']) && $question->options && $question->options->count())
         <div class="box mb-3">
           <h6 class="mb-3">{{ __('Options') }}</h6>
 
@@ -159,10 +173,34 @@
           <h6 class="mb-3">CLASSIFICATION</h6>
 
           @php
-            $catA = $classCats['A'] ?? [];
-            $catB = $classCats['B'] ?? [];
+            // Normalize categories if they come as indexed array
+            $catA = null;
+            $catB = null;
+
+            // Try to find by ID first
+            foreach ($classCats as $c) {
+              if (($c['id'] ?? '') === 'A')
+                $catA = $c;
+              if (($c['id'] ?? '') === 'B')
+                $catB = $c;
+            }
+
+            // Fallback to index if not found by ID
+            if (!$catA && isset($classCats['A']))
+              $catA = $classCats['A'];
+            if (!$catB && isset($classCats['B']))
+              $catB = $classCats['B'];
+
+            if (!$catA && isset($classCats[0]))
+              $catA = $classCats[0];
+            if (!$catB && isset($classCats[1]))
+              $catB = $classCats[1];
+
             $catA_ar = $catA['label_ar'] ?? $catA['ar'] ?? '';
+            $catA_en = $catA['label_en'] ?? $catA['en'] ?? '';
+
             $catB_ar = $catB['label_ar'] ?? $catB['ar'] ?? '';
+            $catB_en = $catB['label_en'] ?? $catB['en'] ?? '';
           @endphp
 
           <div class="row g-2 mb-3">
@@ -170,12 +208,18 @@
               <div class="opt">
                 <strong>Category A</strong>
                 <div dir="rtl">{{ $catA_ar ?: '—' }}</div>
+                @if($catA_en)
+                  <div class="small text-muted mt-1">{{ $catA_en }}</div>
+                @endif
               </div>
             </div>
             <div class="col-12 col-md-6">
               <div class="opt">
                 <strong>Category B</strong>
                 <div dir="rtl">{{ $catB_ar ?: '—' }}</div>
+                @if($catB_en)
+                  <div class="small text-muted mt-1">{{ $catB_en }}</div>
+                @endif
               </div>
             </div>
           </div>

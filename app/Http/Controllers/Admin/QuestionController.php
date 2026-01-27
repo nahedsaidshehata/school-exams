@@ -198,13 +198,23 @@ class QuestionController extends Controller
 
         DB::beginTransaction();
         try {
+            // Prepare metadata
+            $metadata = $request->input('metadata', []);
+
+            // Merge independent fields into metadata
+            if ($request->filled('question_text_ar'))
+                $metadata['question_text_ar'] = $request->question_text_ar;
+            if ($request->filled('question_text_en'))
+                $metadata['question_text_en'] = $request->question_text_en;
+
+            // Save question
             $question = Question::create([
                 'lesson_id' => $request->lesson_id,
                 'type' => $request->type,
                 'difficulty' => strtoupper($request->difficulty),
                 'prompt_en' => (string) ($request->prompt_en ?? ''),
                 'prompt_ar' => (string) ($request->prompt_ar ?? ''),
-                'metadata' => $request->input('metadata', []),
+                'metadata' => $metadata,
             ]);
 
             $this->syncOptions($question, $request);
@@ -274,11 +284,23 @@ class QuestionController extends Controller
 
         DB::beginTransaction();
         try {
-            // ✅ IMPORTANT: do NOT wipe metadata if the form didn’t submit it
+            // Start with existing metadata
             $newMetadata = $question->metadata ?? [];
+
+            // Merge form metadata
             if ($request->has('metadata')) {
-                $newMetadata = $request->input('metadata', []);
+                // If the form sends metadata array, likely we want to merge or replace.
+                // For deep nested arrays like classification, simple array_merge might be risky if we want to replace lists.
+                // The form sends the complete state of classification/reorder, so replacing those keys is usually expected.
+                $inputMeta = $request->input('metadata', []);
+                $newMetadata = array_merge($newMetadata, $inputMeta);
             }
+
+            // Merge independent fields
+            if ($request->has('question_text_ar'))
+                $newMetadata['question_text_ar'] = $request->question_text_ar;
+            if ($request->has('question_text_en'))
+                $newMetadata['question_text_en'] = $request->question_text_en;
 
             $question->update([
                 'lesson_id' => $request->lesson_id,
