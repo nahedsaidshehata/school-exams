@@ -30,179 +30,388 @@
 @section('content')
   @push('head')
     <style>
-      .exam-room-topbar{
-        background: linear-gradient(135deg, rgba(13,110,253,.10), rgba(25,135,84,.08));
+      .exam-room-topbar {
+        background: linear-gradient(135deg, rgba(13, 110, 253, .10), rgba(25, 135, 84, .08));
         border: 1px solid var(--stu-border);
         border-radius: var(--stu-radius);
         padding: 14px;
       }
 
-      .status-indicator{
-        display:inline-flex; align-items:center; gap: 8px;
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         padding: 8px 10px;
         border-radius: 999px;
-        border: 1px solid rgba(15,23,42,.10);
-        background: rgba(255,255,255,.92);
+        border: 1px solid rgba(15, 23, 42, .10);
+        background: rgba(255, 255, 255, .92);
         font-weight: 900;
         font-size: .85rem;
-        color: rgba(15,23,42,.78);
+        color: rgba(15, 23, 42, .78);
       }
-      .status-indicator .dot{ width: 10px; height: 10px; border-radius: 999px; background: rgba(15,23,42,.28); }
-      .status-indicator.saving .dot{ background: rgba(245,158,11,.95); }
-      .status-indicator.saved .dot{ background: rgba(25,135,84,.95); }
 
-      .timer-pill{
-        display:inline-flex; align-items:center; gap: 8px;
+      .status-indicator .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, .28);
+      }
+
+      .status-indicator.saving .dot {
+        background: rgba(245, 158, 11, .95);
+      }
+
+      .status-indicator.saved .dot {
+        background: rgba(25, 135, 84, .95);
+      }
+
+      .timer-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         padding: 8px 10px;
         border-radius: 999px;
-        border: 1px solid rgba(15,23,42,.10);
-        background: rgba(255,255,255,.92);
+        border: 1px solid rgba(15, 23, 42, .10);
+        background: rgba(255, 255, 255, .92);
         font-variant-numeric: tabular-nums;
         font-weight: 950;
         letter-spacing: .2px;
       }
-      .timer-pill.normal{ color: rgba(15,23,42,.80); }
-      .timer-pill.warning{ color: #8a5a00; border-color: rgba(245,158,11,.28); background: rgba(245,158,11,.14); }
-      .timer-pill.danger{ color: #dc3545; border-color: rgba(220,53,69,.24); background: rgba(220,53,69,.10); }
 
-      .modern-progress{
+      .timer-pill.normal {
+        color: rgba(15, 23, 42, .80);
+      }
+
+      .timer-pill.warning {
+        color: #8a5a00;
+        border-color: rgba(245, 158, 11, .28);
+        background: rgba(245, 158, 11, .14);
+      }
+
+      .timer-pill.danger {
+        color: #dc3545;
+        border-color: rgba(220, 53, 69, .24);
+        background: rgba(220, 53, 69, .10);
+      }
+
+      .modern-progress {
         height: 10px;
         border-radius: 999px;
-        background: rgba(15,23,42,.08);
+        background: rgba(15, 23, 42, .08);
         overflow: hidden;
       }
-      .modern-progress .progress-bar{
+
+      .modern-progress .progress-bar {
         border-radius: 999px;
-        background: rgba(13,110,253,.95);
+        background: rgba(13, 110, 253, .95);
       }
 
-      .question-nav-sidebar .question-grid{
+      .question-nav-sidebar .question-grid {
         display: grid;
         grid-template-columns: repeat(6, 1fr);
         gap: 8px;
       }
-      @media (max-width: 1200px){
-        .question-nav-sidebar .question-grid{ grid-template-columns: repeat(5, 1fr); }
-      }
-      @media (max-width: 576px){
-        .question-nav-sidebar .question-grid{ grid-template-columns: repeat(6, 1fr); }
+
+      @media (max-width: 1200px) {
+        .question-nav-sidebar .question-grid {
+          grid-template-columns: repeat(5, 1fr);
+        }
       }
 
-      .question-btn{
+      @media (max-width: 576px) {
+        .question-nav-sidebar .question-grid {
+          grid-template-columns: repeat(6, 1fr);
+        }
+      }
+
+      .question-btn {
         height: 40px;
         border-radius: 14px;
-        border: 1px solid rgba(15,23,42,.12);
+        border: 1px solid rgba(15, 23, 42, .12);
         background: #fff;
         font-weight: 950;
         transition: transform .12s ease, background .12s ease, border-color .12s ease;
       }
-      .question-btn:hover{ background: rgba(13,110,253,.06); border-color: rgba(13,110,253,.22); transform: translateY(-1px); }
-      .question-btn.current{ background: rgba(13,110,253,.12); border-color: rgba(13,110,253,.30); color: #0d6efd; }
-      .question-btn.answered{ background: rgba(25,135,84,.10); border-color: rgba(25,135,84,.22); color: #198754; }
-      .question-btn.unanswered{ background: #fff; }
-      .question-btn.flagged{ box-shadow: inset 0 0 0 2px rgba(245,158,11,.32); }
 
-      .chip-like{
-        display:inline-flex;
-        align-items:center;
+      .question-btn:hover {
+        background: rgba(13, 110, 253, .06);
+        border-color: rgba(13, 110, 253, .22);
+        transform: translateY(-1px);
+      }
+
+      .question-btn.current {
+        background: rgba(13, 110, 253, .12);
+        border-color: rgba(13, 110, 253, .30);
+        color: #0d6efd;
+      }
+
+      .question-btn.answered {
+        background: rgba(25, 135, 84, .10);
+        border-color: rgba(25, 135, 84, .22);
+        color: #198754;
+      }
+
+      .question-btn.unanswered {
+        background: #fff;
+      }
+
+      .question-btn.flagged {
+        box-shadow: inset 0 0 0 2px rgba(245, 158, 11, .32);
+      }
+
+      .chip-like {
+        display: inline-flex;
+        align-items: center;
         gap: 8px;
         padding: 8px 12px;
         border-radius: 999px;
-        border: 1px solid rgba(15,23,42,.12);
+        border: 1px solid rgba(15, 23, 42, .12);
         background: #fff;
         font-weight: 800;
         cursor: pointer;
         transition: background .15s ease, border-color .15s ease, transform .1s ease;
       }
-      .chip-like:hover{
-        background: rgba(13,110,253,.06);
-        border-color: rgba(13,110,253,.20);
+
+      .chip-like:hover {
+        background: rgba(13, 110, 253, .06);
+        border-color: rgba(13, 110, 253, .20);
         transform: translateY(-1px);
       }
-      .chip-like.active{
-        background: rgba(13,110,253,.10);
-        border-color: rgba(13,110,253,.24);
+
+      .chip-like.active {
+        background: rgba(13, 110, 253, .10);
+        border-color: rgba(13, 110, 253, .24);
         color: #0d6efd;
       }
 
-      .nav-legend .legend-item{
-        display:inline-flex; align-items:center; gap: 8px;
+      .nav-legend .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         padding: 6px 10px;
         border-radius: 999px;
-        border: 1px solid rgba(15,23,42,.08);
-        background: rgba(255,255,255,.9);
+        border: 1px solid rgba(15, 23, 42, .08);
+        background: rgba(255, 255, 255, .9);
         font-weight: 800;
         font-size: .82rem;
       }
-      .legend-dot{ width: 10px; height: 10px; border-radius: 999px; display:inline-block; background: rgba(15,23,42,.20); }
-      .legend-dot.current{ background: rgba(13,110,253,.95); }
-      .legend-dot.answered{ background: rgba(25,135,84,.95); }
-      .legend-dot.unanswered{ background: rgba(15,23,42,.28); }
-      .legend-dot.flagged{ background: rgba(245,158,11,.95); }
 
-      .question-card{
-        border: 1px solid rgba(15,23,42,.08);
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        display: inline-block;
+        background: rgba(15, 23, 42, .20);
+      }
+
+      .legend-dot.current {
+        background: rgba(13, 110, 253, .95);
+      }
+
+      .legend-dot.answered {
+        background: rgba(25, 135, 84, .95);
+      }
+
+      .legend-dot.unanswered {
+        background: rgba(15, 23, 42, .28);
+      }
+
+      .legend-dot.flagged {
+        background: rgba(245, 158, 11, .95);
+      }
+
+      .question-card {
+        border: 1px solid rgba(15, 23, 42, .08);
         border-radius: var(--stu-radius);
         padding: 14px;
         background: #fff;
       }
-      .question-title .q-ar{
+
+      .question-title .q-ar {
         font-weight: 950;
         font-size: 1.08rem;
         letter-spacing: .2px;
         line-height: 1.3;
       }
 
-      .option-card{
-        display:flex;
+      .option-card {
+        display: flex;
         gap: 10px;
-        align-items:flex-start;
+        align-items: flex-start;
         padding: 12px;
         border-radius: 16px;
-        border: 1px solid rgba(15,23,42,.10);
+        border: 1px solid rgba(15, 23, 42, .10);
         background: #fff;
         cursor: pointer;
         transition: transform .12s ease, background .12s ease, border-color .12s ease;
       }
-      .option-card:hover{ background: rgba(13,110,253,.05); border-color: rgba(13,110,253,.22); transform: translateY(-1px); }
-      .option-card.selected{ background: rgba(13,110,253,.10); border-color: rgba(13,110,253,.30); }
 
-      .exam-room-hints{
-        display:flex; flex-wrap:wrap; gap: 10px; align-items:center; justify-content:space-between;
+      .option-card:hover {
+        background: rgba(13, 110, 253, .05);
+        border-color: rgba(13, 110, 253, .22);
+        transform: translateY(-1px);
+      }
+
+      .option-card.selected {
+        background: rgba(13, 110, 253, .10);
+        border-color: rgba(13, 110, 253, .30);
+      }
+
+      .exam-room-hints {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
         margin-top: 10px;
       }
-      .exam-room-hints .hint{ color: rgba(15,23,42,.62); font-size: .92rem; }
 
-      .stu-kbd{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
+      .exam-room-hints .hint {
+        color: rgba(15, 23, 42, .62);
+        font-size: .92rem;
+      }
+
+      .stu-kbd {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         min-width: 34px;
         padding: 6px 8px;
         border-radius: 10px;
-        border: 1px solid rgba(15,23,42,.12);
-        background: rgba(255,255,255,.92);
+        border: 1px solid rgba(15, 23, 42, .12);
+        background: rgba(255, 255, 255, .92);
         font-weight: 900;
         font-size: .85rem;
       }
 
-      .focus-toggle{ display:inline-flex; align-items:center; gap: 8px; }
+      .focus-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Classification Drag & Drop Styles */
+      .cls-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        margin-top: 20px;
+        user-select: none;
+      }
+
+      .cls-pool {
+        min-height: 80px;
+        padding: 20px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        background: #f8fafc;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: center;
+        transition: background .2s, border-color .2s;
+      }
+
+      .cls-pool.drag-over {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+      }
+
+      .cls-buckets {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .cls-buckets {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .cls-bucket {
+        min-height: 250px;
+        padding: 20px;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 2px solid transparent;
+        position: relative;
+      }
+
+      .cls-bucket.drag-over {
+        transform: scale(1.02);
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
+        z-index: 5;
+      }
+
+      /* Vibrant Colors for buckets */
+      .cls-bucket-A {
+        background: linear-gradient(145deg, #e0f2fe, #bae6fd);
+        border-color: #38bdf8;
+        color: #0c4a6e;
+      }
+
+      .cls-bucket-B {
+        background: linear-gradient(145deg, #ffe4e6, #fecdd3);
+        border-color: #fb7185;
+        color: #881337;
+      }
+
+      .cls-bucket-C {
+        background: linear-gradient(145deg, #ecfccb, #d9f99d);
+        border-color: #a3e635;
+        color: #365314;
+      }
+
+      .cls-bucket-header {
+        text-align: center;
+        margin-bottom: 10px;
+        font-weight: 900;
+        font-size: 1.1rem;
+        padding-bottom: 12px;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .cls-item {
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 10px 18px;
+        border-radius: 999px;
+        cursor: grab;
+        font-weight: 700;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        color: #1e293b;
+      }
+
+      .cls-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+
+      .cls-item:active {
+        cursor: grabbing;
+        transform: scale(0.95);
+      }
+
+      .cls-item.ghost {
+        opacity: 0.4;
+        background: #e2e8f0;
+        border-style: dashed;
+      }
     </style>
   @endpush
 
-  <div
-    x-data="ExamRoom()"
-    x-init="init()"
-    class="exam-room"
-    data-exam-id="{{ $examId }}"
-    data-attempt-id="{{ $attemptId }}"
-    data-questions-url="{{ $questionsUrl }}"
-    data-save-url="{{ $saveUrl }}"
-    data-heartbeat-url="{{ $heartbeatUrl }}"
-    data-submit-url="{{ $submitUrl }}"
-    data-attempt-session="{{ $attemptSession }}"
-    data-is-rtl="{{ $isRtl ? '1' : '0' }}"
-  >
+  <div x-data="ExamRoom()" x-init="init()" class="exam-room" data-exam-id="{{ $examId }}"
+    data-attempt-id="{{ $attemptId }}" data-questions-url="{{ $questionsUrl }}" data-save-url="{{ $saveUrl }}"
+    data-heartbeat-url="{{ $heartbeatUrl }}" data-submit-url="{{ $submitUrl }}"
+    data-attempt-session="{{ $attemptSession }}" data-is-rtl="{{ $isRtl ? '1' : '0' }}">
     {{-- Top bar --}}
     <div class="exam-room-topbar">
       <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
@@ -214,24 +423,23 @@
         </div>
 
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <button type="button" class="btn btn-outline-secondary focus-toggle"
-                  @click="toggleFocusMode()" :disabled="submitting">
+          <button type="button" class="btn btn-outline-secondary focus-toggle" @click="toggleFocusMode()"
+            :disabled="submitting">
             <span x-text="focusMode ? '🧘 {{ __('Focus On') }}' : '🧩 {{ __('Focus Off') }}'"></span>
           </button>
 
-          <div class="status-indicator" :class="saving ? 'saving' : (savedOnce ? 'saved' : '')" role="status" aria-live="polite">
+          <div class="status-indicator" :class="saving ? 'saving' : (savedOnce ? 'saved' : '')" role="status"
+            aria-live="polite">
             <span class="dot"></span>
-            <span x-text="saving ? '{{ __('Saving...') }}' : (savedOnce ? '{{ __('Saved') }}' : '{{ __('Ready') }}')"></span>
+            <span
+              x-text="saving ? '{{ __('Saving...') }}' : (savedOnce ? '{{ __('Saved') }}' : '{{ __('Ready') }}')"></span>
           </div>
 
           <div class="timer-pill" :class="timeLeft <= 300 ? 'danger' : (timeLeft <= 900 ? 'warning' : 'normal')">
             ⏱ <span x-text="formatTime(timeLeft)"></span>
           </div>
 
-          <button class="btn btn-danger"
-                  type="button"
-                  :disabled="submitting || locked"
-                  @click="confirmSubmit()">
+          <button class="btn btn-danger" type="button" :disabled="submitting || locked" @click="confirmSubmit()">
             {{ __('Submit') }}
           </button>
         </div>
@@ -244,7 +452,8 @@
             <strong x-text="answeredCount"></strong>/<span x-text="totalQuestions"></span> {{ __('answered') }}
           </div>
           <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" type="button" @click="jumpToUnanswered()" :disabled="locked || totalQuestions === 0">
+            <button class="btn btn-sm btn-outline-secondary" type="button" @click="jumpToUnanswered()"
+              :disabled="locked || totalQuestions === 0">
               {{ __('Jump to Unanswered') }}
             </button>
           </div>
@@ -280,10 +489,12 @@
               <button type="button" class="chip-like" :class="navFilter==='all'?'active':''" @click="navFilter='all'">
                 {{ __('All') }}
               </button>
-              <button type="button" class="chip-like" :class="navFilter==='unanswered'?'active':''" @click="navFilter='unanswered'">
+              <button type="button" class="chip-like" :class="navFilter==='unanswered'?'active':''"
+                @click="navFilter='unanswered'">
                 {{ __('Unanswered') }}
               </button>
-              <button type="button" class="chip-like" :class="navFilter==='flagged'?'active':''" @click="navFilter='flagged'">
+              <button type="button" class="chip-like" :class="navFilter==='flagged'?'active':''"
+                @click="navFilter='flagged'">
                 {{ __('Flagged') }}
               </button>
             </div>
@@ -301,12 +512,8 @@
             {{-- Grid --}}
             <div class="question-grid">
               <template x-for="(q, idx) in filteredNavQuestions()" :key="q._key">
-                <button type="button"
-                        class="question-btn"
-                        :class="navBtnClass(q, idx)"
-                        @click="goTo(idx)"
-                        :disabled="locked"
-                        :title="`${idx+1}`">
+                <button type="button" class="question-btn" :class="navBtnClass(q, idx)" @click="goTo(idx)"
+                  :disabled="locked" :title="`${idx+1}`">
                   <span x-text="idx+1"></span>
                 </button>
               </template>
@@ -342,8 +549,10 @@
                       {{ __('Question') }} <span x-text="currentIndex + 1"></span>/<span x-text="totalQuestions"></span>
                     </span>
 
-                    <span class="badge" :class="isAnswered(currentQuestion()) ? 'badge-soft-success' : 'badge-soft-secondary'">
-                      <span x-text="isAnswered(currentQuestion()) ? '{{ __('Answered') }}' : '{{ __('Unanswered') }}'"></span>
+                    <span class="badge"
+                      :class="isAnswered(currentQuestion()) ? 'badge-soft-success' : 'badge-soft-secondary'">
+                      <span
+                        x-text="isAnswered(currentQuestion()) ? '{{ __('Answered') }}' : '{{ __('Unanswered') }}'"></span>
                     </span>
 
                     <span class="badge badge-soft-warning" x-show="isFlagged(currentQuestion())">
@@ -352,18 +561,19 @@
                   </div>
 
                   <div class="d-flex align-items-center gap-2">
-                    <button type="button"
-                            class="btn btn-sm btn-outline-warning"
-                            @click="toggleFlag(currentQuestion())"
-                            :disabled="locked || !currentQuestion()">
-                      <span x-text="isFlagged(currentQuestion()) ? '🚩 {{ __('Unflag') }}' : '🚩 {{ __('Flag') }}'"></span>
+                    <button type="button" class="btn btn-sm btn-outline-warning" @click="toggleFlag(currentQuestion())"
+                      :disabled="locked || !currentQuestion()">
+                      <span
+                        x-text="isFlagged(currentQuestion()) ? '🚩 {{ __('Unflag') }}' : '🚩 {{ __('Flag') }}'"></span>
                     </button>
 
                     <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-sm btn-outline-secondary" @click="prev()" :disabled="locked || currentIndex<=0">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" @click="prev()"
+                        :disabled="locked || currentIndex<=0">
                         {{ $isRtl ? '→' : '←' }} {{ __('Prev') }}
                       </button>
-                      <button type="button" class="btn btn-sm btn-outline-secondary" @click="next()" :disabled="locked || currentIndex>=totalQuestions-1">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" @click="next()"
+                        :disabled="locked || currentIndex>=totalQuestions-1">
                         {{ __('Next') }} {{ $isRtl ? '←' : '→' }}
                       </button>
                     </div>
@@ -374,25 +584,21 @@
                   <div class="question-title">
                     <div class="q-ar" x-text="currentQuestion()?.text_ar || currentQuestion()?.text || ''"></div>
                     <div class="q-en text-muted small mt-1" x-show="(currentQuestion()?.text_en || '').length"
-                         x-text="currentQuestion()?.text_en"></div>
+                      x-text="currentQuestion()?.text_en"></div>
                   </div>
 
                   <template x-if="isMcq(currentQuestion())">
                     <div class="options-list mt-3">
                       <template x-for="opt in currentQuestion().options" :key="opt._key">
                         <label class="option-card" :class="isSelected(currentQuestion(), opt) ? 'selected' : ''">
-                          <input class="form-check-input mt-1"
-                                 type="radio"
-                                 :name="'q_'+currentQuestion().id"
-                                 :value="opt.value"
-                                 :checked="isSelected(currentQuestion(), opt)"
-                                 @change="onMcqChange(currentQuestion(), opt)"
-                                 :disabled="locked">
+                          <input class="form-check-input mt-1" type="radio" :name="'q_'+currentQuestion().id"
+                            :value="opt.value" :checked="isSelected(currentQuestion(), opt)"
+                            @change="onMcqChange(currentQuestion(), opt)" :disabled="locked">
                           <div class="option-text">
-                            <div class="opt-ar" style="font-weight: 850;" x-text="opt.label_ar || opt.label || opt.text_ar || opt.text || ''"></div>
-                            <div class="opt-en small text-muted mt-1"
-                                 x-show="(opt.label_en || opt.text_en || '').length"
-                                 x-text="opt.label_en || opt.text_en"></div>
+                            <div class="opt-ar" style="font-weight: 850;"
+                              x-text="opt.label_ar || opt.label || opt.text_ar || opt.text || ''"></div>
+                            <div class="opt-en small text-muted mt-1" x-show="(opt.label_en || opt.text_en || '').length"
+                              x-text="opt.label_en || opt.text_en"></div>
                           </div>
                         </label>
                       </template>
@@ -406,14 +612,20 @@
                       </div>
                       <div class="reorder-list" :data-reorder-question="currentQuestion().id">
                         <template x-for="(opt, idx) in currentQuestion().options" :key="opt._key">
-                          <div class="reorder-item d-flex align-items-center gap-2 mb-2 p-2 border rounded" :data-option-id="opt.value">
+                          <div class="reorder-item d-flex align-items-center gap-2 mb-2 p-2 border rounded"
+                            :data-option-id="opt.value">
                             <div class="flex-grow-1">
-                              <div class="fw-bold" x-text="opt.label_ar || opt.label || opt.text_ar || opt.text || ''"></div>
-                              <div class="small text-muted" x-show="(opt.label_en || opt.text_en || '').length" x-text="opt.label_en || opt.text_en"></div>
+                              <div class="fw-bold" x-text="opt.label_ar || opt.label || opt.text_ar || opt.text || ''">
+                              </div>
+                              <div class="small text-muted" x-show="(opt.label_en || opt.text_en || '').length"
+                                x-text="opt.label_en || opt.text_en"></div>
                             </div>
                             <div class="btn-group-vertical" role="group">
-                              <button type="button" class="btn btn-sm btn-outline-secondary" @click="moveReorderUp(currentQuestion(), idx)" :disabled="locked || idx === 0">↑</button>
-                              <button type="button" class="btn btn-sm btn-outline-secondary" @click="moveReorderDown(currentQuestion(), idx)" :disabled="locked || idx === currentQuestion().options.length - 1">↓</button>
+                              <button type="button" class="btn btn-sm btn-outline-secondary"
+                                @click="moveReorderUp(currentQuestion(), idx)" :disabled="locked || idx === 0">↑</button>
+                              <button type="button" class="btn btn-sm btn-outline-secondary"
+                                @click="moveReorderDown(currentQuestion(), idx)"
+                                :disabled="locked || idx === currentQuestion().options.length - 1">↓</button>
                             </div>
                           </div>
                         </template>
@@ -423,19 +635,69 @@
 
                   <template x-if="isEssay(currentQuestion())">
                     <div class="mt-3">
-                      <textarea class="form-control"
-                                rows="6"
-                                placeholder="{{ __('Type your answer here...') }}"
-                                x-model="answers[currentQuestion().id]"
-                                @input="onEssayInput(currentQuestion())"
-                                :disabled="locked"></textarea>
+                      <textarea class="form-control" rows="6" placeholder="{{ __('Type your answer here...') }}"
+                        x-model="answers[currentQuestion().id]" @input="onEssayInput(currentQuestion())"
+                        :disabled="locked"></textarea>
                       <div class="text-muted small mt-2">
                         {{ __('Your answer is saved automatically.') }}
                       </div>
                     </div>
                   </template>
 
-                  <template x-if="currentQuestion() && !isMcq(currentQuestion()) && !isEssay(currentQuestion()) && !isReorder(currentQuestion())">
+                  <template x-if="isClassification(currentQuestion())">
+                    <div class="cls-container">
+                        <div class="alert alert-info small d-flex align-items-center gap-2">
+                             <span>ℹ️</span>
+                             <span>{{ __('Drag and drop the items into the correct category.') }}</span>
+                        </div>
+
+                        <!-- Pool -->
+                        <div class="cls-pool"
+                             @dragover="onClassifyDragOver($event)"
+                             @dragleave="onClassifyDragLeave($event)"
+                             @drop="onClassifyDrop($event, currentQuestion(), null)">
+                             
+                            <template x-for="item in getClassificationPool(currentQuestion())" :key="item._idx">
+                                <div class="cls-item"
+                                     draggable="true"
+                                     @dragstart="onClassifyDragStart($event, currentQuestion(), item._idx)"
+                                     @dragend="onClassifyDragEnd($event)"
+                                     x-text="isRtl ? (item.text_ar || item.text) : (item.text_en || item.text)">
+                                </div>
+                            </template>
+                            
+                            <div x-show="getClassificationPool(currentQuestion()).length === 0" class="text-muted small fst-italic">
+                                {{ __('All items sorted ✅') }}
+                            </div>
+                        </div>
+
+                        <!-- Buckets -->
+                        <div class="cls-buckets">
+                            <template x-for="(cat, cIdx) in getClassificationCategories(currentQuestion())" :key="cat.id">
+                                <div class="cls-bucket" 
+                                     :class="cat.id === 'A' ? 'cls-bucket-A' : (cat.id === 'B' ? 'cls-bucket-B' : 'cls-bucket-C')"
+                                     @dragover="onClassifyDragOver($event)"
+                                     @dragleave="onClassifyDragLeave($event)"
+                                     @drop="onClassifyDrop($event, currentQuestion(), cat.id)">
+                                     
+                                    <div class="cls-bucket-header" x-text="isRtl ? cat.label_ar : cat.label_en"></div>
+                                    
+                                    <template x-for="item in getClassificationBucketItems(currentQuestion(), cat.id)" :key="item._idx">
+                                        <div class="cls-item"
+                                             draggable="true"
+                                             @dragstart="onClassifyDragStart($event, currentQuestion(), item._idx)"
+                                             @dragend="onClassifyDragEnd($event)"
+                                             x-text="isRtl ? (item.text_ar || item.text) : (item.text_en || item.text)">
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                  </template>
+
+                  <template
+                    x-if="currentQuestion() && !isMcq(currentQuestion()) && !isEssay(currentQuestion()) && !isReorder(currentQuestion()) && !isClassification(currentQuestion())">
                     <div class="alert alert-warning mt-3">
                       {{ __('Unsupported question type. Please contact your teacher.') }}
                     </div>
@@ -469,522 +731,609 @@
 
   {{-- ✅ JS: same logic كما هو (UI only tweaks above) --}}
   @push('scripts')
-  <script>
-    function ExamRoom() {
-      return {
-        loading: true,
-        errorMsg: '',
-        locked: false,
-        submitting: false,
-        saving: false,
-        savedOnce: false,
+    <script>
+      function ExamRoom() {
+        return {
+          loading: true,
+          errorMsg: '',
+          locked: false,
+          submitting: false,
+          saving: false,
+          savedOnce: false,
 
-        questions: [],
-        currentIndex: 0,
-        answers: {},
-        navFilter: 'all',
-        flagged: {},
+          questions: [],
+          currentIndex: 0,
+          answers: {},
+          navFilter: 'all',
+          flagged: {},
 
-        focusMode: false,
+          focusMode: false,
 
-        timeLeft: 0,
-        tickInterval: null,
-        heartbeatInterval: null,
-        autosaveInterval: null,
-        stopEverything: false,
+          timeLeft: 0,
+          tickInterval: null,
+          heartbeatInterval: null,
+          autosaveInterval: null,
+          stopEverything: false,
 
-        get totalQuestions() { return this.questions.length; },
-        get answeredCount() {
-          let c = 0;
-          for (const q of this.questions) {
-            const v = this.answers[q.id];
-            if (v !== undefined && v !== null && String(v).trim() !== '') c++;
-          }
-          return c;
-        },
-
-        toastSuccess(msg){ if (window.StudentUI?.success) StudentUI.success(msg); },
-        toastError(msg){ if (window.StudentUI?.error) StudentUI.error(msg); },
-        toastInfo(msg){ if (window.StudentUI?.info) StudentUI.info(msg); },
-
-        formatTime(sec){
-          if (window.StudentUI?.formatTime) return StudentUI.formatTime(sec);
-          sec = Math.max(0, parseInt(sec||0,10));
-          const m = Math.floor(sec/60), s = sec%60;
-          return `${m}:${String(s).padStart(2,'0')}`;
-        },
-
-        progressPercent(){
-          if (!this.totalQuestions) return 0;
-          return Math.round((this.answeredCount / this.totalQuestions) * 100);
-        },
-
-        attr(name){ return this.$root?.dataset?.[name] || ''; },
-        get endpoints(){
-          return {
-            questions: this.attr('questionsUrl'),
-            save: this.attr('saveUrl'),
-            heartbeat: this.attr('heartbeatUrl'),
-            submit: this.attr('submitUrl'),
-          };
-        },
-        get attemptSession(){ return this.attr('attemptSession'); },
-        get isRtl(){ return this.attr('isRtl') === '1'; },
-
-        focusStorageKey(){
-          const attemptId = this.attr('attemptId') || 'unknown';
-          return `student_focus_${attemptId}`;
-        },
-        applyFocusMode(){
-          try{
-            if (this.focusMode) document.body.classList.add('exam-focus');
-            else document.body.classList.remove('exam-focus');
-          }catch(e){}
-        },
-        loadFocusMode(){
-          try{
-            const raw = localStorage.getItem(this.focusStorageKey());
-            this.focusMode = raw ? (raw === '1') : false;
-          }catch(e){ this.focusMode = false; }
-          this.applyFocusMode();
-        },
-        toggleFocusMode(){
-          this.focusMode = !this.focusMode;
-          try{ localStorage.setItem(this.focusStorageKey(), this.focusMode ? '1' : '0'); }catch(e){}
-          this.applyFocusMode();
-          this.toastInfo(this.focusMode ? '{{ __('Focus mode enabled') }}' : '{{ __('Focus mode disabled') }}');
-        },
-
-        async init() {
-          try {
-            this.loadFocusMode();
-            this.loadFlagged();
-            await this.loadQuestions();
-            this.startTimerLoops();
-            this.bindSafetyGuards();
-            this.bindKeyboardNav();
-            this.loading = false;
-          } catch (e) {
-            this.loading = false;
-            this.errorMsg = e?.message || 'Failed to initialize exam room.';
-          }
-        },
-
-        bindSafetyGuards(){
-          const self = this;
-          function handler(e){
-            if (self.locked) return;
-            e.preventDefault();
-            e.returnValue = '';
-            return '';
-          }
-          window.addEventListener('beforeunload', handler);
-          this.$watch('locked', function(v){
-            if (v) { try { window.removeEventListener('beforeunload', handler); } catch(e) {} }
-          });
-        },
-
-        bindKeyboardNav(){
-          const self = this;
-          document.addEventListener('keydown', function(e){
-            if (self.locked) return;
-            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
-
-            if (e.key === 'ArrowUp') { e.preventDefault(); self.prev(); }
-            if (e.key === 'ArrowDown') { e.preventDefault(); self.next(); }
-
-            if (!self.isRtl) {
-              if (e.key === 'ArrowLeft') { e.preventDefault(); self.prev(); }
-              if (e.key === 'ArrowRight') { e.preventDefault(); self.next(); }
-            } else {
-              if (e.key === 'ArrowRight') { e.preventDefault(); self.prev(); }
-              if (e.key === 'ArrowLeft') { e.preventDefault(); self.next(); }
+          get totalQuestions() { return this.questions.length; },
+          get answeredCount() {
+            let c = 0;
+            for (const q of this.questions) {
+              const v = this.answers[q.id];
+              if (v !== undefined && v !== null && String(v).trim() !== '') c++;
             }
-          });
-        },
+            return c;
+          },
 
-        headers() {
-          const h = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-          };
-          const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-          if (token) h['X-CSRF-TOKEN'] = token;
-          if (this.attemptSession) h['X-ATTEMPT-SESSION'] = this.attemptSession;
-          return h;
-        },
+          toastSuccess(msg) { if (window.StudentUI?.success) StudentUI.success(msg); },
+          toastError(msg) { if (window.StudentUI?.error) StudentUI.error(msg); },
+          toastInfo(msg) { if (window.StudentUI?.info) StudentUI.info(msg); },
 
-        async safeFetch(url, options) {
-          if (this.stopEverything) throw new Error('Stopped');
-          const res = await fetch(url, options);
-          if (res.status === 409 || res.status === 403) {
-            this.lockAndStop(res.status);
-          }
-          return res;
-        },
+          formatTime(sec) {
+            if (window.StudentUI?.formatTime) return StudentUI.formatTime(sec);
+            sec = Math.max(0, parseInt(sec || 0, 10));
+            const m = Math.floor(sec / 60), s = sec % 60;
+            return `${m}:${String(s).padStart(2, '0')}`;
+          },
 
-        lockAndStop(code) {
-          this.locked = true;
-          this.stopAllIntervals();
-          this.stopEverything = true;
-          this.toastError(code === 409
-            ? '{{ __('Your attempt is no longer active (409).') }}'
-            : '{{ __('Access denied or session expired (403).') }}'
-          );
-        },
+          progressPercent() {
+            if (!this.totalQuestions) return 0;
+            return Math.round((this.answeredCount / this.totalQuestions) * 100);
+          },
 
-        stopAllIntervals() {
-          if (this.tickInterval) clearInterval(this.tickInterval);
-          if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-          if (this.autosaveInterval) clearInterval(this.autosaveInterval);
-          this.tickInterval = this.heartbeatInterval = this.autosaveInterval = null;
-        },
-
-        async loadQuestions() {
-          const url = this.endpoints.questions;
-          if (!url) throw new Error('Questions endpoint missing.');
-
-          const res = await this.safeFetch(url, { method: 'GET', headers: this.headers() });
-          if (!res.ok) throw new Error('Failed to load questions.');
-
-          const data = await res.json();
-          const questions = Array.isArray(data) ? data : (data.questions || data.data || []);
-          const serverAnswers = data.answers || data.student_answers || {};
-          const timeLeft = data.time_left ?? data.attempt?.time_left ?? data.attempt?.remaining_seconds ?? null;
-
-          this.questions = (questions || []).map((q, i) => this.normalizeQuestion(q, i));
-          this.answers = this.normalizeAnswers(serverAnswers);
-
-          this.timeLeft = Number.isFinite(+timeLeft) ? parseInt(timeLeft, 10) : (this.timeLeft || 0);
-
-          const locked = data.locked ?? data.attempt?.locked ?? data.attempt?.is_locked ?? false;
-          if (locked) {
-            this.locked = true;
-            this.stopAllIntervals();
-            this.stopEverything = true;
-          }
-
-          this.currentIndex = Math.min(this.currentIndex, Math.max(0, this.questions.length - 1));
-        },
-
-        normalizeQuestion(raw, idx) {
-          const q = Object.assign({}, raw);
-          q.id = q.id ?? q.question_id ?? `q_${idx}`;
-          q._key = `k_${q.id}_${idx}`;
-
-          q.text_ar = q.text_ar ?? q.title_ar ?? q.question_ar ?? q.text ?? q.title ?? '';
-          q.text_en = q.text_en ?? q.title_en ?? q.question_en ?? '';
-
-          q.type = (q.type ?? q.question_type ?? q.kind ?? '').toString().toLowerCase();
-
-          const opts = q.options ?? q.choices ?? q.answers ?? [];
-          q.options = (opts || []).map((o, j) => ({
-            _key: `o_${q.id}_${j}`,
-            value: o.value ?? o.id ?? o.key ?? o.code ?? (o.label ?? o.text ?? j),
-            label_ar: o.label_ar ?? o.text_ar ?? o.label ?? o.text ?? '',
-            label_en: o.label_en ?? o.text_en ?? '',
-          }));
-
-          return q;
-        },
-
-        normalizeAnswers(serverAnswers) {
-          if (Array.isArray(serverAnswers)) {
-            const out = {};
-            for (const row of serverAnswers) {
-              const qid = row.question_id ?? row.id;
-              const v = row.answer ?? row.value ?? row.student_response ?? row.response ?? '';
-              if (qid) out[qid] = this.extractAnswerValue(v);
-            }
-            return out;
-          }
-          if (serverAnswers && typeof serverAnswers === 'object') {
-            const out = {};
-            for (const [qid, v] of Object.entries(serverAnswers)) {
-              out[qid] = this.extractAnswerValue(v);
-            }
-            return out;
-          }
-          return {};
-        },
-
-        extractAnswerValue(v) {
-          try {
-            if (typeof v === 'string' && v.trim().startsWith('{')) {
-              const j = JSON.parse(v);
-              if (Array.isArray(j.order)) return '__reordered__';
-              return j.answer ?? j.value ?? j.text ?? v;
-            }
-            if (v && typeof v === 'object') {
-              if (Array.isArray(v.order)) return '__reordered__';
-              return v.answer ?? v.value ?? v.text ?? '__saved__';
-            }
-          } catch(e) {}
-          return v;
-        },
-
-        currentQuestion(){ return this.questions[this.currentIndex] || null; },
-
-        isMcq(q){
-          if (!q) return false;
-          return ['mcq','multiple_choice','multiple-choice','choice','select'].includes(q.type) || (q.options && q.options.length && !this.isReorder(q));
-        },
-        isEssay(q){
-          if (!q) return false;
-          return ['essay','text','written','open'].includes(q.type);
-        },
-        isReorder(q){
-          if (!q) return false;
-          return ['reorder','re_order','order','sorting','sequence'].includes(q.type);
-        },
-
-        isAnswered(q){
-          if (!q) return false;
-          const v = this.answers[q.id];
-          return v !== undefined && v !== null && String(v).trim() !== '';
-        },
-
-        flagStorageKey(){
-          const attemptId = this.attr('attemptId') || 'unknown';
-          return `student_flags_${attemptId}`;
-        },
-        loadFlagged(){
-          try {
-            const raw = localStorage.getItem(this.flagStorageKey());
-            this.flagged = raw ? JSON.parse(raw) : {};
-          } catch(e) { this.flagged = {}; }
-        },
-        saveFlagged(){
-          try { localStorage.setItem(this.flagStorageKey(), JSON.stringify(this.flagged || {})); } catch(e) {}
-        },
-        isFlagged(q){
-          if (!q) return false;
-          return !!this.flagged[q.id];
-        },
-        toggleFlag(q){
-          if (!q || this.locked) return;
-          this.flagged[q.id] = !this.flagged[q.id];
-          this.saveFlagged();
-          this.toastInfo(this.flagged[q.id] ? '{{ __('Flagged for review') }}' : '{{ __('Removed flag') }}');
-        },
-
-        filteredNavQuestions() {
-          if (this.navFilter === 'unanswered') return this.questions.filter(q => !this.isAnswered(q));
-          if (this.navFilter === 'flagged') return this.questions.filter(q => this.isFlagged(q));
-          return this.questions;
-        },
-
-        navBtnClass(q, idx) {
-          const isCurrent = (this.questions[this.currentIndex]?.id === q.id);
-          const answered = this.isAnswered(q);
-          const flagged = this.isFlagged(q);
-
-          return [
-            isCurrent ? 'current' : '',
-            answered ? 'answered' : 'unanswered',
-            flagged ? 'flagged' : ''
-          ].join(' ');
-        },
-
-        goTo(idx) {
-          if (this.locked) return;
-          idx = parseInt(idx,10);
-          if (Number.isNaN(idx) || idx < 0 || idx >= this.totalQuestions) return;
-          this.currentIndex = idx;
-
-          const el = this.$root.querySelector('.question-card');
-          if (el && window.StudentUI?.scrollTo) StudentUI.scrollTo(el);
-        },
-
-        next(){ this.goTo(Math.min(this.totalQuestions-1, this.currentIndex+1)); },
-        prev(){ this.goTo(Math.max(0, this.currentIndex-1)); },
-
-        jumpToUnanswered() {
-          if (this.locked) return;
-          const idx = this.questions.findIndex(q => !this.isAnswered(q));
-          if (idx === -1) { this.toastInfo('{{ __('All questions are answered.') }}'); return; }
-          this.goTo(idx);
-        },
-
-        isSelected(q, opt){
-          if (!q || !opt) return false;
-          const v = this.answers[q.id];
-          return String(v) === String(opt.value);
-        },
-
-        onMcqChange(q, opt){
-          if (!q || this.locked) return;
-          this.answers[q.id] = String(opt.value);
-          this.queueSave(q);
-        },
-
-        onEssayInput(q){
-          if (!q || this.locked) return;
-          this.queueSave(q, true);
-        },
-
-        moveReorderUp(q, idx){
-          if (!q || this.locked || idx <= 0) return;
-          const opts = q.options;
-          [opts[idx-1], opts[idx]] = [opts[idx], opts[idx-1]];
-          this.answers[q.id] = '__reordered__';
-          this.queueSave(q, true);
-        },
-
-        moveReorderDown(q, idx){
-          if (!q || this.locked || idx >= q.options.length - 1) return;
-          const opts = q.options;
-          [opts[idx], opts[idx+1]] = [opts[idx+1], opts[idx]];
-          this.answers[q.id] = '__reordered__';
-          this.queueSave(q, true);
-        },
-
-        saveDebounce: null,
-        queueSave(q, silent=false){
-          if (this.locked) return;
-          if (this.saveDebounce) clearTimeout(this.saveDebounce);
-          this.saveDebounce = setTimeout(() => { this.saveAnswer(q, silent); }, 350);
-        },
-
-        buildResponse(q){
-          if (!q) return {};
-          if (this.isReorder(q)) return { order: this.getReorderOrder(q) };
-          if (this.isMcq(q)) return { answer: this.answers[q.id] ?? '' };
-          if (this.isEssay(q)) return { text: this.answers[q.id] ?? '' };
-          return { value: this.answers[q.id] ?? '' };
-        },
-
-        getReorderOrder(q){
-          return (q.options || []).map(o => String(o.value)).filter(Boolean);
-        },
-
-        async saveAnswer(q, silent=false){
-          const url = this.endpoints.save;
-          if (!url) {
-            if (!silent) this.toastInfo('{{ __('Saved locally') }}');
-            this.savedOnce = true;
-            return;
-          }
-
-          try {
-            this.saving = true;
-
-            const payload = { question_id: q.id, response: this.buildResponse(q) };
-
-            const res = await this.safeFetch(url, {
-              method: 'POST',
-              headers: this.headers(),
-              body: JSON.stringify(payload),
-            });
-
-            if (!res.ok) throw new Error('Save failed');
-
-            this.savedOnce = true;
-            if (!silent) this.toastSuccess('{{ __('Saved') }}');
-          } catch (e) {
-            if (!this.stopEverything) this.toastError('{{ __('Autosave failed') }}');
-          } finally {
-            this.saving = false;
-          }
-        },
-
-        startTimerLoops(){
-          this.tickInterval = setInterval(() => {
-            if (this.stopEverything || this.locked) return;
-
-            if (this.timeLeft > 0) {
-              this.timeLeft--;
-              if (this.timeLeft === 300) this.toastInfo('{{ __('Only 5 minutes left!') }}');
-              if (this.timeLeft === 0) {
-                this.toastInfo('{{ __('Time is up. Submitting...') }}');
-                this.submitAttempt();
-              }
-            }
-          }, 1000);
-
-          this.heartbeatInterval = setInterval(() => {
-            if (this.stopEverything || this.locked) return;
-            this.sendHeartbeat();
-          }, 15000);
-
-          this.autosaveInterval = setInterval(() => {
-            if (this.stopEverything || this.locked) return;
-          }, 20000);
-        },
-
-        async sendHeartbeat(){
-          const url = this.endpoints.heartbeat;
-          if (!url) return;
-
-          try {
-            const res = await this.safeFetch(url, {
-              method: 'POST',
-              headers: this.headers(),
-              body: JSON.stringify({ t: Date.now() }),
-            });
-            if (!res.ok) throw new Error('hb');
-          } catch(e) {}
-        },
-
-        confirmSubmit(){
-          if (this.locked || this.submitting) return;
-          const ok = window.StudentUI?.confirm
-            ? StudentUI.confirm('{{ __('Are you sure you want to submit?') }}')
-            : confirm('{{ __('Are you sure you want to submit?') }}');
-          if (ok) this.submitAttempt();
-        },
-
-        async submitAttempt(){
-          if (this.locked || this.submitting) return;
-
-          const url = this.endpoints.submit;
-          if (!url) { this.toastError('{{ __('Submit endpoint missing.') }}'); return; }
-
-          try {
-            this.submitting = true;
-            this.toastInfo('{{ __('Submitting...') }}');
-
-            const payload = {
-              answers: this.answers,
-              flagged: Object.keys(this.flagged || {}).filter(k => this.flagged[k]),
+          attr(name) { return this.$root?.dataset?.[name] || ''; },
+          get endpoints() {
+            return {
+              questions: this.attr('questionsUrl'),
+              save: this.attr('saveUrl'),
+              heartbeat: this.attr('heartbeatUrl'),
+              submit: this.attr('submitUrl'),
             };
+          },
+          get attemptSession() { return this.attr('attemptSession'); },
+          get isRtl() { return this.attr('isRtl') === '1'; },
 
-            const res = await this.safeFetch(url, {
-              method: 'POST',
-              headers: this.headers(),
-              body: JSON.stringify(payload),
-            });
+          focusStorageKey() {
+            const attemptId = this.attr('attemptId') || 'unknown';
+            return `student_focus_${attemptId}`;
+          },
+          applyFocusMode() {
+            try {
+              if (this.focusMode) document.body.classList.add('exam-focus');
+              else document.body.classList.remove('exam-focus');
+            } catch (e) { }
+          },
+          loadFocusMode() {
+            try {
+              const raw = localStorage.getItem(this.focusStorageKey());
+              this.focusMode = raw ? (raw === '1') : false;
+            } catch (e) { this.focusMode = false; }
+            this.applyFocusMode();
+          },
+          toggleFocusMode() {
+            this.focusMode = !this.focusMode;
+            try { localStorage.setItem(this.focusStorageKey(), this.focusMode ? '1' : '0'); } catch (e) { }
+            this.applyFocusMode();
+            this.toastInfo(this.focusMode ? '{{ __('Focus mode enabled') }}' : '{{ __('Focus mode disabled') }}');
+          },
 
-            if (!res.ok) {
-              if (res.status === 409 || res.status === 403) return;
-              throw new Error('submit failed');
+          async init() {
+            try {
+              this.loadFocusMode();
+              this.loadFlagged();
+              await this.loadQuestions();
+              this.startTimerLoops();
+              this.bindSafetyGuards();
+              this.bindKeyboardNav();
+              this.loading = false;
+            } catch (e) {
+              this.loading = false;
+              this.errorMsg = e?.message || 'Failed to initialize exam room.';
             }
+          },
 
+          bindSafetyGuards() {
+            const self = this;
+            function handler(e) {
+              if (self.locked) return;
+              e.preventDefault();
+              e.returnValue = '';
+              return '';
+            }
+            window.addEventListener('beforeunload', handler);
+            this.$watch('locked', function (v) {
+              if (v) { try { window.removeEventListener('beforeunload', handler); } catch (e) { } }
+            });
+          },
+
+          bindKeyboardNav() {
+            const self = this;
+            document.addEventListener('keydown', function (e) {
+              if (self.locked) return;
+              if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
+
+              if (e.key === 'ArrowUp') { e.preventDefault(); self.prev(); }
+              if (e.key === 'ArrowDown') { e.preventDefault(); self.next(); }
+
+              if (!self.isRtl) {
+                if (e.key === 'ArrowLeft') { e.preventDefault(); self.prev(); }
+                if (e.key === 'ArrowRight') { e.preventDefault(); self.next(); }
+              } else {
+                if (e.key === 'ArrowRight') { e.preventDefault(); self.prev(); }
+                if (e.key === 'ArrowLeft') { e.preventDefault(); self.next(); }
+              }
+            });
+          },
+
+          headers() {
+            const h = {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+            };
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (token) h['X-CSRF-TOKEN'] = token;
+            if (this.attemptSession) h['X-ATTEMPT-SESSION'] = this.attemptSession;
+            return h;
+          },
+
+          async safeFetch(url, options) {
+            if (this.stopEverything) throw new Error('Stopped');
+            const res = await fetch(url, options);
+            if (res.status === 409 || res.status === 403) {
+              this.lockAndStop(res.status);
+            }
+            return res;
+          },
+
+          lockAndStop(code) {
             this.locked = true;
             this.stopAllIntervals();
             this.stopEverything = true;
+            this.toastError(code === 409
+              ? '{{ __('Your attempt is no longer active (409).') }}'
+              : '{{ __('Access denied or session expired (403).') }}'
+            );
+          },
 
-            try { document.body.classList.remove('exam-focus'); } catch(e) {}
+          stopAllIntervals() {
+            if (this.tickInterval) clearInterval(this.tickInterval);
+            if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
+            if (this.autosaveInterval) clearInterval(this.autosaveInterval);
+            this.tickInterval = this.heartbeatInterval = this.autosaveInterval = null;
+          },
 
-            this.toastSuccess('{{ __('Submitted successfully!') }}');
+          async loadQuestions() {
+            const url = this.endpoints.questions;
+            if (!url) throw new Error('Questions endpoint missing.');
 
-            setTimeout(() => {
-              if (window.StudentUI?.redirect) {
-                StudentUI.redirect('{{ route('student.exams.index') }}');
-              } else {
-                window.location.href = '{{ route('student.exams.index') }}';
+            const res = await this.safeFetch(url, { method: 'GET', headers: this.headers() });
+            if (!res.ok) throw new Error('Failed to load questions.');
+
+            const data = await res.json();
+            const questions = Array.isArray(data) ? data : (data.questions || data.data || []);
+            const serverAnswers = data.answers || data.student_answers || {};
+            const timeLeft = data.time_left ?? data.attempt?.time_left ?? data.attempt?.remaining_seconds ?? null;
+
+            this.questions = (questions || []).map((q, i) => this.normalizeQuestion(q, i));
+            this.answers = this.normalizeAnswers(serverAnswers);
+
+            this.timeLeft = Number.isFinite(+timeLeft) ? parseInt(timeLeft, 10) : (this.timeLeft || 0);
+
+            const locked = data.locked ?? data.attempt?.locked ?? data.attempt?.is_locked ?? false;
+            if (locked) {
+              this.locked = true;
+              this.stopAllIntervals();
+              this.stopEverything = true;
+            }
+
+            this.currentIndex = Math.min(this.currentIndex, Math.max(0, this.questions.length - 1));
+          },
+
+          normalizeQuestion(raw, idx) {
+            const q = Object.assign({}, raw);
+            q.id = q.id ?? q.question_id ?? `q_${idx}`;
+            q._key = `k_${q.id}_${idx}`;
+
+            q.text_ar = q.text_ar ?? q.title_ar ?? q.question_ar ?? q.text ?? q.title ?? '';
+            q.text_en = q.text_en ?? q.title_en ?? q.question_en ?? '';
+
+            q.type = (q.type ?? q.question_type ?? q.kind ?? '').toString().toLowerCase();
+
+            const opts = q.options ?? q.choices ?? q.answers ?? [];
+            q.options = (opts || []).map((o, j) => ({
+              _key: `o_${q.id}_${j}`,
+              value: o.value ?? o.id ?? o.key ?? o.code ?? (o.label ?? o.text ?? j),
+              label_ar: o.label_ar ?? o.text_ar ?? o.label ?? o.text ?? '',
+              label_en: o.label_en ?? o.text_en ?? '',
+            }));
+
+            return q;
+          },
+
+          normalizeAnswers(serverAnswers) {
+            if (Array.isArray(serverAnswers)) {
+              const out = {};
+              for (const row of serverAnswers) {
+                const qid = row.question_id ?? row.id;
+                const v = row.answer ?? row.value ?? row.student_response ?? row.response ?? '';
+                if (qid) out[qid] = this.extractAnswerValue(v);
               }
-            }, 2000);
+              return out;
+            }
+            if (serverAnswers && typeof serverAnswers === 'object') {
+              const out = {};
+              for (const [qid, v] of Object.entries(serverAnswers)) {
+                out[qid] = this.extractAnswerValue(v);
+              }
+              return out;
+            }
+            return {};
+          },
 
-          } catch (e) {
-            if (!this.stopEverything) this.toastError('{{ __('Submit failed. Please try again.') }}');
-          } finally {
-            this.submitting = false;
-          }
-        },
-      };
-    }
-  </script>
+          extractAnswerValue(v) {
+            try {
+              if (typeof v === 'string' && v.trim().startsWith('{')) {
+                const j = JSON.parse(v);
+                if (Array.isArray(j.order)) return '__reordered__';
+                if (j.mapping) return j.mapping; // Classification Support
+                return j.answer ?? j.value ?? j.text ?? v;
+              }
+              if (v && typeof v === 'object') {
+                if (Array.isArray(v.order)) return '__reordered__';
+                if (v.mapping) return v.mapping; // Classification Support
+                return v.answer ?? v.value ?? v.text ?? '__saved__';
+              }
+            } catch (e) { }
+            return v;
+          },
+
+          currentQuestion() { return this.questions[this.currentIndex] || null; },
+
+          isMcq(q) {
+            if (!q) return false;
+            return ['mcq', 'multiple_choice', 'multiple-choice', 'choice', 'select'].includes(q.type) || (q.options && q.options.length && !this.isReorder(q));
+          },
+          isEssay(q) {
+            if (!q) return false;
+            return ['essay', 'text', 'written', 'open'].includes(q.type);
+          },
+          isReorder(q) {
+            if (!q) return false;
+            return ['reorder', 're_order', 'order', 'sorting', 'sequence'].includes(q.type);
+          },
+
+          isAnswered(q) {
+            if (!q) return false;
+            const v = this.answers[q.id];
+            return v !== undefined && v !== null && String(v).trim() !== '';
+          },
+
+          flagStorageKey() {
+            const attemptId = this.attr('attemptId') || 'unknown';
+            return `student_flags_${attemptId}`;
+          },
+          loadFlagged() {
+            try {
+              const raw = localStorage.getItem(this.flagStorageKey());
+              this.flagged = raw ? JSON.parse(raw) : {};
+            } catch (e) { this.flagged = {}; }
+          },
+          saveFlagged() {
+            try { localStorage.setItem(this.flagStorageKey(), JSON.stringify(this.flagged || {})); } catch (e) { }
+          },
+          isFlagged(q) {
+            if (!q) return false;
+            return !!this.flagged[q.id];
+          },
+          toggleFlag(q) {
+            if (!q || this.locked) return;
+            this.flagged[q.id] = !this.flagged[q.id];
+            this.saveFlagged();
+            this.toastInfo(this.flagged[q.id] ? '{{ __('Flagged for review') }}' : '{{ __('Removed flag') }}');
+          },
+
+          filteredNavQuestions() {
+            if (this.navFilter === 'unanswered') return this.questions.filter(q => !this.isAnswered(q));
+            if (this.navFilter === 'flagged') return this.questions.filter(q => this.isFlagged(q));
+            return this.questions;
+          },
+
+          navBtnClass(q, idx) {
+            const isCurrent = (this.questions[this.currentIndex]?.id === q.id);
+            const answered = this.isAnswered(q);
+            const flagged = this.isFlagged(q);
+
+            return [
+              isCurrent ? 'current' : '',
+              answered ? 'answered' : 'unanswered',
+              flagged ? 'flagged' : ''
+            ].join(' ');
+          },
+
+          goTo(idx) {
+            if (this.locked) return;
+            idx = parseInt(idx, 10);
+            if (Number.isNaN(idx) || idx < 0 || idx >= this.totalQuestions) return;
+            this.currentIndex = idx;
+
+            const el = this.$root.querySelector('.question-card');
+            if (el && window.StudentUI?.scrollTo) StudentUI.scrollTo(el);
+          },
+
+          next() { this.goTo(Math.min(this.totalQuestions - 1, this.currentIndex + 1)); },
+          prev() { this.goTo(Math.max(0, this.currentIndex - 1)); },
+
+          jumpToUnanswered() {
+            if (this.locked) return;
+            const idx = this.questions.findIndex(q => !this.isAnswered(q));
+            if (idx === -1) { this.toastInfo('{{ __('All questions are answered.') }}'); return; }
+            this.goTo(idx);
+          },
+
+          isSelected(q, opt) {
+            if (!q || !opt) return false;
+            const v = this.answers[q.id];
+            return String(v) === String(opt.value);
+          },
+
+          onMcqChange(q, opt) {
+            if (!q || this.locked) return;
+            this.answers[q.id] = String(opt.value);
+            this.queueSave(q);
+          },
+
+          onEssayInput(q) {
+            if (!q || this.locked) return;
+            this.queueSave(q, true);
+          },
+
+          moveReorderUp(q, idx) {
+            if (!q || this.locked || idx <= 0) return;
+            const opts = q.options;
+            [opts[idx - 1], opts[idx]] = [opts[idx], opts[idx - 1]];
+            this.answers[q.id] = '__reordered__';
+            this.queueSave(q, true);
+          },
+
+          moveReorderDown(q, idx) {
+            if (!q || this.locked || idx >= q.options.length - 1) return;
+            const opts = q.options;
+            [opts[idx], opts[idx + 1]] = [opts[idx + 1], opts[idx]];
+            this.answers[q.id] = '__reordered__';
+            this.queueSave(q, true);
+          },
+
+          saveDebounce: null,
+          queueSave(q, silent = false) {
+            if (this.locked) return;
+            if (this.saveDebounce) clearTimeout(this.saveDebounce);
+            this.saveDebounce = setTimeout(() => { this.saveAnswer(q, silent); }, 350);
+          },
+
+          buildResponse(q) {
+            if (!q) return {};
+            if (this.isClassification(q)) {
+              return { mapping: this.answers[q.id] || {} };
+            }
+            if (this.isReorder(q)) return { order: this.getReorderOrder(q) };
+            if (this.isMcq(q)) return { answer: this.answers[q.id] ?? '' };
+            if (this.isEssay(q)) return { text: this.answers[q.id] ?? '' };
+            return { value: this.answers[q.id] ?? '' };
+          },
+
+          isClassification(q){
+              if (!q) return false;
+              return ['classification', 'classify', 'categorize'].includes(q.type);
+          },
+
+          getClassificationCategories(q) {
+              if (!q || !q.classification || !q.classification.categories) return [];
+              return q.classification.categories;
+          },
+          
+          getClassificationPool(q) {
+              if (!q || !q.classification || !q.classification.items) return [];
+              const mapping = this.answers[q.id] || {};
+              // Convert boolean keys from PHP JSON object if needed (unlikely) but ensure we handle string/int keys
+              return q.classification.items.map((item, idx) => ({ ...item, _idx: idx }))
+                  .filter(item => !mapping.hasOwnProperty(item._idx));
+          },
+
+          getClassificationBucketItems(q, catId) {
+              if (!q || !q.classification || !q.classification.items) return [];
+              const mapping = this.answers[q.id] || {};
+              return q.classification.items.map((item, idx) => ({ ...item, _idx: idx }))
+                  .filter(item => mapping[item._idx] === catId);
+          },
+
+          draggedItem: null,
+          
+          onClassifyDragStart(e, q, itemIdx) {
+              if (this.locked) {
+                  e.preventDefault();
+                  return;
+              }
+              // DataTransfer is required for Firefox
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('text/plain', JSON.stringify({ qId: q.id, itemIdx: itemIdx }));
+              e.target.classList.add('ghost');
+          },
+
+          onClassifyDragEnd(e) {
+              e.target.classList.remove('ghost');
+              document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+          },
+
+          onClassifyDragOver(e) {
+              if (this.locked) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move'; 
+              e.currentTarget.classList.add('drag-over');
+          },
+
+          onClassifyDragLeave(e) {
+              e.currentTarget.classList.remove('drag-over');
+          },
+
+          onClassifyDrop(e, q, targetCatId) {
+              if (this.locked) return;
+              e.preventDefault();
+              e.currentTarget.classList.remove('drag-over');
+
+              const raw = e.dataTransfer.getData('text/plain');
+              if (!raw) return;
+              
+              try {
+                  const data = JSON.parse(raw);
+                  if (data.qId !== q.id) return;
+                  
+                  let mapping = { ...(this.answers[q.id] || {}) };
+                  
+                  if (targetCatId === null) {
+                      delete mapping[data.itemIdx];
+                  } else {
+                      mapping[data.itemIdx] = targetCatId;
+                  }
+                  
+                  this.answers[q.id] = mapping;
+                  this.queueSave(q); // Trigger auto-save
+                  
+              } catch(err) {
+                  console.error('Drop error', err);
+              }
+          },
+
+          getReorderOrder(q) {
+            return (q.options || []).map(o => String(o.value)).filter(Boolean);
+          },
+
+          async saveAnswer(q, silent = false) {
+            const url = this.endpoints.save;
+            if (!url) {
+              if (!silent) this.toastInfo('{{ __('Saved locally') }}');
+              this.savedOnce = true;
+              return;
+            }
+
+            try {
+              this.saving = true;
+
+              const payload = { question_id: q.id, response: this.buildResponse(q) };
+
+              const res = await this.safeFetch(url, {
+                method: 'POST',
+                headers: this.headers(),
+                body: JSON.stringify(payload),
+              });
+
+              if (!res.ok) throw new Error('Save failed');
+
+              this.savedOnce = true;
+              if (!silent) this.toastSuccess('{{ __('Saved') }}');
+            } catch (e) {
+              if (!this.stopEverything) this.toastError('{{ __('Autosave failed') }}');
+            } finally {
+              this.saving = false;
+            }
+          },
+
+          startTimerLoops() {
+            this.tickInterval = setInterval(() => {
+              if (this.stopEverything || this.locked) return;
+
+              if (this.timeLeft > 0) {
+                this.timeLeft--;
+                if (this.timeLeft === 300) this.toastInfo('{{ __('Only 5 minutes left!') }}');
+                if (this.timeLeft === 0) {
+                  this.toastInfo('{{ __('Time is up. Submitting...') }}');
+                  this.submitAttempt();
+                }
+              }
+            }, 1000);
+
+            this.heartbeatInterval = setInterval(() => {
+              if (this.stopEverything || this.locked) return;
+              this.sendHeartbeat();
+            }, 15000);
+
+            this.autosaveInterval = setInterval(() => {
+              if (this.stopEverything || this.locked) return;
+            }, 20000);
+          },
+
+          async sendHeartbeat() {
+            const url = this.endpoints.heartbeat;
+            if (!url) return;
+
+            try {
+              const res = await this.safeFetch(url, {
+                method: 'POST',
+                headers: this.headers(),
+                body: JSON.stringify({ t: Date.now() }),
+              });
+              if (!res.ok) throw new Error('hb');
+            } catch (e) { }
+          },
+
+          confirmSubmit() {
+            if (this.locked || this.submitting) return;
+            const ok = window.StudentUI?.confirm
+              ? StudentUI.confirm('{{ __('Are you sure you want to submit?') }}')
+              : confirm('{{ __('Are you sure you want to submit?') }}');
+            if (ok) this.submitAttempt();
+          },
+
+          async submitAttempt() {
+            if (this.locked || this.submitting) return;
+
+            const url = this.endpoints.submit;
+            if (!url) { this.toastError('{{ __('Submit endpoint missing.') }}'); return; }
+
+            try {
+              this.submitting = true;
+              this.toastInfo('{{ __('Submitting...') }}');
+
+              const payload = {
+                answers: this.answers,
+                flagged: Object.keys(this.flagged || {}).filter(k => this.flagged[k]),
+              };
+
+              const res = await this.safeFetch(url, {
+                method: 'POST',
+                headers: this.headers(),
+                body: JSON.stringify(payload),
+              });
+
+              if (!res.ok) {
+                if (res.status === 409 || res.status === 403) return;
+                throw new Error('submit failed');
+              }
+
+              this.locked = true;
+              this.stopAllIntervals();
+              this.stopEverything = true;
+
+              try { document.body.classList.remove('exam-focus'); } catch (e) { }
+
+              this.toastSuccess('{{ __('Submitted successfully!') }}');
+
+              setTimeout(() => {
+                if (window.StudentUI?.redirect) {
+                  StudentUI.redirect('{{ route('student.exams.index') }}');
+                } else {
+                  window.location.href = '{{ route('student.exams.index') }}';
+                }
+              }, 2000);
+
+            } catch (e) {
+              if (!this.stopEverything) this.toastError('{{ __('Submit failed. Please try again.') }}');
+            } finally {
+              this.submitting = false;
+            }
+          },
+        };
+      }
+    </script>
   @endpush
 @endsection
